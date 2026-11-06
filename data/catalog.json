@@ -1,0 +1,308 @@
+
+{
+  "version": "0.2",
+  "notice": "Demo data. Age guidance is illustrative, not official.",
+  "titles": [
+    {
+      "id": 1,
+      "kind": "movie",
+      "title": "Iron Man",
+      "year": 2008,
+      "rating": 7.9,
+      "popularity": 900,
+      "min_age": 13,
+      "themes": ["action", "science", "teamwork"],
+      "keywords": ["Marvel", "MCU", "Tony Stark", "superhero"],
+      "summary": "Tony Stark builds an advanced armored suit and becomes Iron Man.",
+      "poster": null,
+      "content_levels": {
+        "violence": "moderate",
+        "horror": "none",
+        "romance": "mild"
+      },
+      "watch_orders": {
+        "release": [
+          "Iron Man",
+          "Thor",
+          "Captain America: The First Avenger",
+          "The Avengers"
+        ],
+        "story": [
+          "Captain America: The First Avenger",
+          "Iron Man",
+          "Thor",
+          "The Avengers"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "kind": "movie",
+      "title": "Thor",
+      "year": 2011,
+      "rating": 7.0,
+      "popularity": 800,
+      "min_age": 13,
+      "themes": ["action", "fantasy", "family"],
+      "keywords": ["Marvel", "MCU", "Thor", "Asgard", "superhero"],
+      "summary": "The powerful Thor is sent to Earth and learns responsibility.",
+      "poster": null,
+      "content_levels": {
+        "violence": "moderate",
+        "horror": "none",
+        "romance": "mild"
+      },
+      "watch_orders": {
+        "release": [
+          "Iron Man",
+          "Thor",
+          "Captain America: The First Avenger",
+          "The Avengers"
+        ],
+        "story": [
+          "Captain America: The First Avenger",
+          "Iron Man",
+          "Thor",
+          "The Avengers"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "kind": "movie",
+      "title": "Captain America: The First Avenger",
+      "year": 2011,
+      "rating": 6.9,
+      "popularity": 850,
+      "min_age": 13,
+      "themes": ["action", "teamwork", "friendship"],
+      "keywords": ["Marvel", "MCU", "Steve Rogers", "superhero"],
+      "summary": "Steve Rogers becomes Captain America during World War II.",
+      "poster": null,
+      "content_levels": {
+        "violence": "moderate",
+        "horror": "none",
+        "romance": "mild"
+      },
+      "watch_orders": {
+        "release": [
+          "Iron Man",
+          "Thor",
+          "Captain America: The First Avenger",
+          "The Avengers"
+        ],
+        "story": [
+          "Captain America: The First Avenger",
+          "Iron Man",
+          "Thor",
+          "The Avengers"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "kind": "movie",
+      "title": "The Avengers",
+      "year": 2012,
+      "rating": 8.0,
+      "popularity": 1000,
+      "min_age": 13,
+      "themes": ["action", "teamwork", "friendship"],
+      "keywords": ["Marvel", "MCU", "Iron Man", "Thor", "Hulk", "superhero"],
+      "summary": "Earth's greatest superheroes unite against a powerful threat.",
+      "poster": null,
+      "content_levels": {
+        "violence": "moderate",
+        "horror": "mild",
+        "romance": "none"
+      },
+      "watch_orders": {
+        "release": [
+          "Iron Man",
+          "Thor",
+          "Captain America: The First Avenger",
+          "The Avengers"
+        ],
+        "story": [
+          "Captain America: The First Avenger",
+          "Iron Man",
+          "Thor",
+          "The Avengers"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "kind": "movie",
+      "title": "Spider-Man: Into the Spider-Verse",
+      "year": 2018,
+      "rating": 8.4,
+      "popularity": 950,
+      "min_age": 10,
+      "themes": ["action", "teamwork", "friendship"],
+      "keywords": ["Spider-Man", "Miles Morales", "Marvel", "multiverse"],
+      "summary": "Miles Morales discovers his powers and meets other Spider-People.",
+      "poster": null,
+      "content_levels": {
+        "violence": "mild",
+        "horror": "mild",
+        "romance": "none"
+      },
+      "watch_orders": {
+        "release": [
+          "Spider-Man: Into the Spider-Verse",
+          "Spider-Man: Across the Spider-Verse"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "kind": "movie",
+      "title": "Spider-Man: Across the Spider-Verse",
+      "year": 2023,
+      "rating": 8.3,
+      "popularity": 950,
+      "min_age": 10,
+      "themes": ["action", "friendship", "family"],
+      "keywords": ["Spider-Man", "Miles Morales", "Marvel", "multiverse"],
+      "summary": "Miles travels through the multiverse and faces difficult choices.",
+      "poster": null,
+      "content_levels": {
+        "violence": "moderate",
+        "horror": "mild",
+        "romance": "none"
+      },
+      "watch_orders": {
+        "release": [
+          "Spider-Man: Into the Spider-Verse",
+          "Spider-Man: Across the Spider-Verse"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "kind": "movie",
+      "title": "How to Train Your Dragon",
+      "year": 2010,
+      "rating": 8.1,
+      "popularity": 900,
+      "min_age": 8,
+      "themes": ["fantasy", "friendship", "family", "teamwork"],
+      "keywords": ["dragons", "Hiccup", "Toothless", "adventure"],
+      "summary": "A young Viking befriends a dragon and changes his village.",
+      "poster": null,
+      "content_levels": {
+        "violence": "mild",
+        "horror": "mild",
+        "romance": "none"
+      },
+      "watch_orders": {
+        "release": [
+          "How to Train Your Dragon",
+          "How to Train Your Dragon 2",
+          "How to Train Your Dragon: The Hidden World"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "kind": "movie",
+      "title": "The Incredibles",
+      "year": 2004,
+      "rating": 8.0,
+      "popularity": 900,
+      "min_age": 8,
+      "themes": ["action", "teamwork", "family"],
+      "keywords": ["Pixar", "superhero", "family", "powers"],
+      "summary": "A family of superheroes joins forces to save the day.",
+      "poster": null,
+      "content_levels": {
+        "violence": "mild",
+        "horror": "mild",
+        "romance": "none"
+      },
+      "watch_orders": {
+        "release": [
+          "The Incredibles",
+          "Incredibles 2"
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "kind": "movie",
+      "title": "The Martian",
+      "year": 2015,
+      "rating": 8.0,
+      "popularity": 850,
+      "min_age": 13,
+      "themes": ["science", "teamwork", "action"],
+      "keywords": ["Mars", "space", "NASA", "survival"],
+      "summary": "An astronaut stranded on Mars uses science to survive.",
+      "poster": null,
+      "content_levels": {
+        "violence": "mild",
+        "horror": "none",
+        "romance": "none"
+      },
+      "watch_orders": {}
+    },
+    {
+      "id": 10,
+      "kind": "movie",
+      "title": "Pride & Prejudice",
+      "year": 2005,
+      "rating": 7.8,
+      "popularity": 700,
+      "min_age": 12,
+      "themes": ["romance", "family", "friendship"],
+      "keywords": ["Jane Austen", "Elizabeth Bennet", "romantic"],
+      "summary": "Elizabeth Bennet navigates love, family and social expectations.",
+      "poster": null,
+      "content_levels": {
+        "violence": "none",
+        "horror": "none",
+        "romance": "moderate"
+      },
+      "watch_orders": {}
+    },
+    {
+      "id": 11,
+      "kind": "tv",
+      "title": "Avatar: The Last Airbender",
+      "year": 2005,
+      "rating": 9.0,
+      "popularity": 1000,
+      "min_age": 9,
+      "themes": ["fantasy", "teamwork", "friendship"],
+      "keywords": ["Aang", "bending", "elements", "adventure"],
+      "summary": "A young Avatar and his friends try to restore balance to the world.",
+      "poster": null,
+      "content_levels": {
+        "violence": "mild",
+        "horror": "mild",
+        "romance": "mild"
+      },
+      "watch_orders": {}
+    },
+    {
+      "id": 12,
+      "kind": "tv",
+      "title": "Stranger Things",
+      "year": 2016,
+      "rating": 8.6,
+      "popularity": 1000,
+      "min_age": 16,
+      "themes": ["friendship", "horror", "fantasy"],
+      "keywords": ["Netflix", "mystery", "supernatural"],
+      "summary": "A group of friends encounters mysterious and dangerous events.",
+      "poster": null,
+      "content_levels": {
+        "violence": "high",
+        "horror": "high",
+        "romance": "mild"
+      },
+      "watch_orders": {}
+    }
+  ]
+}
