@@ -1,0 +1,186 @@
+
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MovieMatch — Find your next favorite</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">✦ <b>MovieMatch</b></a>
+    <div class="header-right">
+      <span class="tiny-pill" id="mode"></span>
+      <select id="language" aria-label="Language">
+        <option value="en">English</option>
+        <option value="he">עברית</option>
+        <option value="es">Español</option>
+        <option value="ru">Русский</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow" data-i18n="eyebrow">
+        MOVIE NIGHT, SORTED
+      </div>
+      <h1 data-i18n="headline">
+        Less scrolling. More watching.
+      </h1>
+      <p data-i18n="subtitle">
+        Tell us what you love. Get 3 thoughtful picks.
+      </p>
+      <div class="steps">
+        <span>01 · Your taste</span>
+        <span>02 · Smart match</span>
+        <span>03 · Watch</span>
+      </div>
+    </section>
+
+    <div class="columns">
+      <section class="panel">
+        <h2 data-i18n="discover">
+          What would you like to discover?
+        </h2>
+
+        <label data-i18n="kind">Movie or series?</label>
+        <div class="chips" id="kind">
+          <button class="active" data-kind="both"
+                  data-i18n="both">Surprise me</button>
+          <button data-kind="movie"
+                  data-i18n="movie">Movies</button>
+          <button data-kind="tv"
+                  data-i18n="tv">Series</button>
+        </div>
+
+        <div class="two">
+          <div>
+            <label for="age" data-i18n="age">
+              Viewer's age
+            </label>
+            <input id="age" type="number"
+                   min="1" max="100" value="14">
+          </div>
+          <div>
+            <label for="region" data-i18n="region">
+              Country
+            </label>
+            <select id="region">
+              <option value="IL">Israel</option>
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="ES">Spain</option>
+              <option value="RU">Russia</option>
+              <option value="CN">China</option>
+            </select>
+          </div>
+        </div>
+
+        <label data-i18n="services">
+          Your streaming services
+        </label>
+        <div class="chips" id="services">
+          <button class="selected"
+                  data-service="Netflix">Netflix</button>
+          <button class="selected"
+                  data-service="Disney+">Disney+</button>
+          <button data-service="Prime Video">Prime Video</button>
+          <button data-service="Apple TV+">Apple TV+</button>
+          <button data-service="yes">yes</button>
+          <button data-service="HOT">HOT</button>
+        </div>
+
+        <label for="taste" data-i18n="taste">
+          What do you like?
+        </label>
+        <textarea id="taste"
+          data-placeholder="tastePlaceholder"
+          placeholder="Marvel, Avatar, dragons..."></textarea>
+
+        <label data-i18n="themes">I want</label>
+        <div class="chips" id="themes">
+          <button data-theme="teamwork"
+                  data-i18n="teamwork">Teamwork</button>
+          <button data-theme="action"
+                  data-i18n="action">Action</button>
+          <button data-theme="family"
+                  data-i18n="family">Family</button>
+          <button data-theme="romance"
+                  data-i18n="romance">Romance</button>
+          <button data-theme="science"
+                  data-i18n="science">Science</button>
+          <button data-theme="friendship"
+                  data-i18n="friendship">Friendship</button>
+        </div>
+
+        <label data-i18n="avoid">Avoid</label>
+        <div class="chips" id="avoid">
+          <button data-avoid="horror"
+                  data-i18n="horror">Horror</button>
+          <button data-avoid="violence"
+                  data-i18n="violence">Violence</button>
+          <button data-avoid="romance"
+                  data-i18n="romance">Romance</button>
+        </div>
+
+        <button class="primary" id="go" data-i18n="go">
+          ✦ Find my next watch
+        </button>
+
+        <p class="footnote" data-i18n="notice">
+          Demo with 9 example titles.
+          Age labels are illustrative.
+        </p>
+      </section>
+
+      <section class="results">
+        <div class="result-heading">
+          <div class="eyebrow" data-i18n="personal">
+            PERSONALIZED PICKS
+          </div>
+          <h2 data-i18n="matches">Your next favorites</h2>
+        </div>
+
+        <div id="cards" class="cards">
+          <div class="empty" data-i18n="empty">
+            Choose your preferences to begin.
+          </div>
+        </div>
+
+        <section class="lookup">
+          <h3 data-i18n="lookup">
+            Search the full movie database
+          </h3>
+          <p data-i18n="lookupNote">
+            Connect TMDB to search live titles.
+          </p>
+          <div class="search">
+            <input id="search"
+              data-placeholder="searchPlaceholder"
+              placeholder="Search movie or series...">
+            <button id="find" data-i18n="search">
+              Search
+            </button>
+          </div>
+          <div id="searchResults"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>MovieMatch · Prototype v0.1</div>
+    <p>
+      This product uses the TMDB API but is not
+      endorsed or certified by TMDB.
+      Sponsored links must be clearly identified.
+    </p>
+  </footer>
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
