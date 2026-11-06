@@ -1,0 +1,26 @@
+
+# API keys
+.env
+.env.local
+.env.production
+*.secret
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Local databases
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# System
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
