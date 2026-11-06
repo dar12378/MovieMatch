@@ -1,186 +1,223 @@
 
-<!doctype html>
-<html lang="en" dir="ltr">
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MovieMatch — Find your next favorite</title>
+  <meta name="theme-color" content="#0b1020">
+  <title>MovieMatch | Discover your next favorite</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/i18n.js" defer></script>
+  <script src="/js/main.js" defer></script>
 </head>
+
 <body>
-  <header>
-    <a class="brand" href="/">✦ <b>MovieMatch</b></a>
-    <div class="header-right">
-      <span class="tiny-pill" id="mode"></span>
+  <header class="header">
+    <a href="/" class="logo">✦ Movie<span>Match</span></a>
+    <nav>
+      <a href="#discover" data-i18n="navDiscover">גלה תוכן</a>
+      <a href="#watchlist" data-i18n="navWatchlist">הרשימה שלי</a>
+    </nav>
+    <div class="header-actions">
       <select id="language" aria-label="Language">
-        <option value="en">English</option>
         <option value="he">עברית</option>
-        <option value="es">Español</option>
-        <option value="ru">Русский</option>
-        <option value="zh">中文</option>
+        <option value="en">English</option>
       </select>
+      <span class="avatar">🎬</span>
     </div>
   </header>
 
-  <main>
+  <main class="container">
     <section class="hero">
-      <div class="eyebrow" data-i18n="eyebrow">
-        MOVIE NIGHT, SORTED
+      <div class="hero-text">
+        <span class="eyebrow" data-i18n="eyebrow">
+          ההמלצה הבאה שלך
+        </span>
+        <h1 data-i18n="headline">
+          הסרט הבא שתאהב מתחיל כאן.
+        </h1>
+        <p data-i18n="subtitle">
+          ספר לנו מה אתה אוהב ונמצא לך סרט או סדרה.
+        </p>
+        <a href="#discover" class="hero-button" data-i18n="getStarted">
+          בוא נתחיל
+        </a>
       </div>
-      <h1 data-i18n="headline">
-        Less scrolling. More watching.
-      </h1>
-      <p data-i18n="subtitle">
-        Tell us what you love. Get 3 thoughtful picks.
-      </p>
-      <div class="steps">
-        <span>01 · Your taste</span>
-        <span>02 · Smart match</span>
-        <span>03 · Watch</span>
+      <div class="hero-art">
+        <span>🍿</span>
+        <span>🎞️</span>
+        <span>✨</span>
       </div>
     </section>
 
-    <div class="columns">
-      <section class="panel">
-        <h2 data-i18n="discover">
-          What would you like to discover?
-        </h2>
+    <section class="stats">
+      <div>
+        <strong>2</strong>
+        <span data-i18n="languages">שפות</span>
+      </div>
+      <div>
+        <strong>3</strong>
+        <span data-i18n="threePicks">המלצות בכל חיפוש</span>
+      </div>
+      <div>
+        <strong>24/7</strong>
+        <span data-i18n="available">זמין בכל שעה</span>
+      </div>
+    </section>
 
-        <label data-i18n="kind">Movie or series?</label>
-        <div class="chips" id="kind">
-          <button class="active" data-kind="both"
-                  data-i18n="both">Surprise me</button>
-          <button data-kind="movie"
-                  data-i18n="movie">Movies</button>
-          <button data-kind="tv"
-                  data-i18n="tv">Series</button>
+    <section id="discover" class="app-layout">
+      <aside class="panel">
+        <div class="panel-heading">
+          <span class="eyebrow">MOVIEMATCH</span>
+          <h2 data-i18n="question">מה תרצה לגלות היום?</h2>
+          <p data-i18n="formHint">
+            בחר את ההעדפות שלך.
+          </p>
         </div>
 
-        <div class="two">
+        <label for="profileName" data-i18n="name">שם הפרופיל</label>
+        <input
+          id="profileName"
+          maxlength="40"
+          placeholder="השם שלך"
+          data-placeholder="namePlaceholder"
+        >
+
+        <div class="two-columns">
           <div>
-            <label for="age" data-i18n="age">
-              Viewer's age
-            </label>
-            <input id="age" type="number"
-                   min="1" max="100" value="14">
+            <label for="age" data-i18n="age">גיל הצופה</label>
+            <input id="age" type="number" min="1" max="100" value="14">
           </div>
           <div>
-            <label for="region" data-i18n="region">
-              Country
-            </label>
+            <label for="region" data-i18n="country">מדינה</label>
             <select id="region">
               <option value="IL">Israel</option>
               <option value="US">United States</option>
               <option value="GB">United Kingdom</option>
               <option value="ES">Spain</option>
-              <option value="RU">Russia</option>
-              <option value="CN">China</option>
             </select>
           </div>
         </div>
 
-        <label data-i18n="services">
-          Your streaming services
-        </label>
-        <div class="chips" id="services">
-          <button class="selected"
-                  data-service="Netflix">Netflix</button>
-          <button class="selected"
-                  data-service="Disney+">Disney+</button>
-          <button data-service="Prime Video">Prime Video</button>
-          <button data-service="Apple TV+">Apple TV+</button>
-          <button data-service="yes">yes</button>
-          <button data-service="HOT">HOT</button>
+        <label data-i18n="contentType">מה מחפשים?</label>
+        <div class="chips single" id="kind">
+          <button type="button" class="active" data-value="both"
+                  data-i18n="surprise">תפתיע אותי</button>
+          <button type="button" data-value="movie"
+                  data-i18n="movies">סרטים</button>
+          <button type="button" data-value="tv"
+                  data-i18n="shows">סדרות</button>
         </div>
 
-        <label for="taste" data-i18n="taste">
-          What do you like?
-        </label>
-        <textarea id="taste"
+        <label data-i18n="services">שירותי הסטרימינג שלך</label>
+        <div class="chips multi" id="services">
+          <button type="button" data-value="Netflix">Netflix</button>
+          <button type="button" data-value="Disney+">Disney+</button>
+          <button type="button" data-value="Prime Video">Prime Video</button>
+          <button type="button" data-value="Apple TV+">Apple TV+</button>
+          <button type="button" data-value="yes">yes</button>
+          <button type="button" data-value="HOT">HOT</button>
+        </div>
+
+        <label for="taste" data-i18n="taste">איזה סרטים אתה אוהב?</label>
+        <textarea
+          id="taste"
+          rows="3"
           data-placeholder="tastePlaceholder"
-          placeholder="Marvel, Avatar, dragons..."></textarea>
+          placeholder="מארוול, אווטאר, דרקונים..."
+        ></textarea>
 
-        <label data-i18n="themes">I want</label>
-        <div class="chips" id="themes">
-          <button data-theme="teamwork"
-                  data-i18n="teamwork">Teamwork</button>
-          <button data-theme="action"
-                  data-i18n="action">Action</button>
-          <button data-theme="family"
-                  data-i18n="family">Family</button>
-          <button data-theme="romance"
-                  data-i18n="romance">Romance</button>
-          <button data-theme="science"
-                  data-i18n="science">Science</button>
-          <button data-theme="friendship"
-                  data-i18n="friendship">Friendship</button>
+        <label data-i18n="themes">מה אתה אוהב בסרטים?</label>
+        <div class="chips multi" id="themes">
+          <button type="button" data-value="action"
+                  data-i18n="action">אקשן</button>
+          <button type="button" data-value="teamwork"
+                  data-i18n="teamwork">עבודת צוות</button>
+          <button type="button" data-value="family"
+                  data-i18n="family">משפחה</button>
+          <button type="button" data-value="friendship"
+                  data-i18n="friendship">חברות</button>
+          <button type="button" data-value="romance"
+                  data-i18n="romance">רומנטיקה</button>
+          <button type="button" data-value="fantasy"
+                  data-i18n="fantasy">פנטזיה</button>
+          <button type="button" data-value="comedy"
+                  data-i18n="comedy">קומדיה</button>
+          <button type="button" data-value="science"
+                  data-i18n="science">מדע</button>
         </div>
 
-        <label data-i18n="avoid">Avoid</label>
-        <div class="chips" id="avoid">
-          <button data-avoid="horror"
-                  data-i18n="horror">Horror</button>
-          <button data-avoid="violence"
-                  data-i18n="violence">Violence</button>
-          <button data-avoid="romance"
-                  data-i18n="romance">Romance</button>
+        <label data-i18n="avoid">ממה להימנע?</label>
+        <div class="chips multi" id="avoid">
+          <button type="button" data-value="horror"
+                  data-i18n="horror">אימה</button>
+          <button type="button" data-value="violence"
+                  data-i18n="violence">אלימות</button>
+          <button type="button" data-value="romance"
+                  data-i18n="romance">רומנטיקה</button>
         </div>
 
-        <button class="primary" id="go" data-i18n="go">
-          ✦ Find my next watch
+        <button id="recommendBtn" class="primary" type="button"
+                data-i18n="find">
+          ✨ מצא לי מה לראות
         </button>
+        <button id="saveProfileBtn" class="secondary" type="button"
+                data-i18n="saveProfile">
+          שמור את הפרופיל שלי
+        </button>
+        <p id="status" class="status" role="status"></p>
+      </aside>
 
-        <p class="footnote" data-i18n="notice">
-          Demo with 9 example titles.
-          Age labels are illustrative.
-        </p>
-      </section>
-
-      <section class="results">
-        <div class="result-heading">
-          <div class="eyebrow" data-i18n="personal">
-            PERSONALIZED PICKS
-          </div>
-          <h2 data-i18n="matches">Your next favorites</h2>
-        </div>
-
-        <div id="cards" class="cards">
-          <div class="empty" data-i18n="empty">
-            Choose your preferences to begin.
-          </div>
-        </div>
-
-        <section class="lookup">
-          <h3 data-i18n="lookup">
-            Search the full movie database
-          </h3>
-          <p data-i18n="lookupNote">
-            Connect TMDB to search live titles.
+      <section class="recommendations">
+        <div class="section-title">
+          <span class="eyebrow" data-i18n="personal">במיוחד בשבילך</span>
+          <h2 data-i18n="resultsTitle">ההמלצות שלך</h2>
+          <p data-i18n="resultsHint">
+            כל המלצה כוללת מידע על הסרט והסבר להתאמה.
           </p>
-          <div class="search">
-            <input id="search"
-              data-placeholder="searchPlaceholder"
-              placeholder="Search movie or series...">
-            <button id="find" data-i18n="search">
-              Search
-            </button>
+        </div>
+
+        <div id="results" class="movie-grid">
+          <div class="empty" data-i18n="empty">
+            בחר את ההעדפות שלך ולחץ על חיפוש.
+          </div>
+        </div>
+
+        <div class="search-panel">
+          <h3 data-i18n="searchTitle">מחפש סרט מסוים?</h3>
+          <p data-i18n="searchHint">
+            חפש לפי שם. מאגר TMDB דורש חיבור API.
+          </p>
+          <div class="search-row">
+            <input id="searchInput"
+                   data-placeholder="searchPlaceholder"
+                   placeholder="שם הסרט או הסדרה">
+            <button id="searchBtn" type="button"
+                    data-i18n="search">חפש</button>
           </div>
           <div id="searchResults"></div>
-        </section>
+        </div>
       </section>
-    </div>
+    </section>
+
+    <section id="watchlist" class="watchlist-section">
+      <div class="section-title">
+        <span class="eyebrow">MY MOVIEMATCH</span>
+        <h2 data-i18n="myWatchlist">רשימת הצפייה שלי</h2>
+      </div>
+      <div id="watchlistItems" class="watchlist-items"></div>
+    </section>
   </main>
 
-  <footer>
-    <div>MovieMatch · Prototype v0.1</div>
+  <footer class="footer">
+    <strong>MovieMatch</strong>
+    <p data-i18n="disclaimer">
+      גרסת הדגמה. גילי הצפייה אינם סיווג רשמי.
+    </p>
     <p>
       This product uses the TMDB API but is not
       endorsed or certified by TMDB.
-      Sponsored links must be clearly identified.
     </p>
   </footer>
-
-  <script src="/js/i18n.js"></script>
-  <script src="/js/main.js"></script>
 </body>
 </html>
