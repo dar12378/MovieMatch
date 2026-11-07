@@ -2,8 +2,13 @@
 "use strict";
 
 (() => {
+  // ========================================
+  // MovieMatch v0.4 - Main Application
+  // ========================================
+
   const $ = id => document.getElementById(id);
-  const $$ = selector => [...document.querySelectorAll(selector)];
+  const $$ = selector =>
+    [...document.querySelectorAll(selector)];
 
   const KEYS = {
     profile: "mm3-profile",
@@ -12,174 +17,375 @@
     language: "mm3-language"
   };
 
+  // ========================================
+  // Profile avatars and theme colors
+  // ========================================
+
   const AVATARS = [
-    { id:"spider", icon:"🕷️", name:"Spider", color:"#e63b57" },
-    { id:"armor", icon:"🤖", name:"Armor", color:"#d99b2b" },
-    { id:"thunder", icon:"⚡", name:"Thunder", color:"#2788ed" },
-    { id:"shield", icon:"🛡️", name:"Shield", color:"#4775db" },
-    { id:"panther", icon:"🐈‍⬛", name:"Panther", color:"#995de2" },
-    { id:"wizard", icon:"🔮", name:"Wizard", color:"#d36cce" },
-    { id:"dragon", icon:"🐉", name:"Dragon", color:"#169f89" },
-    { id:"space", icon:"🚀", name:"Space", color:"#dc7854" },
-    { id:"ninja", icon:"🥷", name:"Ninja", color:"#7378dd" },
-    { id:"hero", icon:"🦸", name:"Hero", color:"#2da77d" }
+    {
+      id: "spider",
+      icon: "🕷️",
+      name: "Spider Hero",
+      color: "#e63b57"
+    },
+    {
+      id: "armor",
+      icon: "🤖",
+      name: "Armor Hero",
+      color: "#d99b2b"
+    },
+    {
+      id: "thunder",
+      icon: "⚡",
+      name: "Thunder Hero",
+      color: "#2788ed"
+    },
+    {
+      id: "shield",
+      icon: "🛡️",
+      name: "Shield Hero",
+      color: "#4775db"
+    },
+    {
+      id: "panther",
+      icon: "🐈‍⬛",
+      name: "Panther Hero",
+      color: "#995de2"
+    },
+    {
+      id: "wizard",
+      icon: "🔮",
+      name: "Magic Hero",
+      color: "#d36cce"
+    },
+    {
+      id: "dragon",
+      icon: "🐉",
+      name: "Dragon Hero",
+      color: "#169f89"
+    },
+    {
+      id: "space",
+      icon: "🚀",
+      name: "Space Hero",
+      color: "#dc7854"
+    },
+    {
+      id: "ninja",
+      icon: "🥷",
+      name: "Ninja Hero",
+      color: "#7378dd"
+    },
+    {
+      id: "hero",
+      icon: "🦸",
+      name: "Super Hero",
+      color: "#2da77d"
+    }
   ];
 
-  function saved(key, fallback) {
+  // ========================================
+  // Saved application data
+  // ========================================
+
+  function readStorage(key, fallback) {
     try {
-      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      const value = localStorage.getItem(key);
+
+      if (!value) return fallback;
+
+      return JSON.parse(value);
     } catch {
       return fallback;
     }
   }
 
-  let profile = saved(KEYS.profile, null);
-  let watchlist = saved(KEYS.list, []);
-  let watched = saved(KEYS.watched, []);
-  let language = localStorage.getItem(KEYS.language) || "he";
-  let selectedAvatar = profile?.avatar || "spider";
+  function saveStorage(key, value) {
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+  }
+
+  let profile = readStorage(KEYS.profile, null);
+  let watchlist = readStorage(KEYS.list, []);
+  let watched = readStorage(KEYS.watched, []);
+
+  if (!Array.isArray(watchlist)) watchlist = [];
+  if (!Array.isArray(watched)) watched = [];
+
+  let language =
+    localStorage.getItem(KEYS.language) || "he";
+
+  let selectedAvatar =
+    profile?.avatar || "spider";
+
   let catalog = [];
   let currentPage = "home";
   let currentMovie = null;
+  let currentSearch = [];
+  let currentCorrection = null;
+  let currentRecommendations = [];
+  let searchRequestId = 0;
 
-  const text = key =>
-    window.I18N[language]?.[key] || window.I18N.he[key] || key;
+  // ========================================
+  // Helpers
+  // ========================================
 
-  function make(tag, content = "", className = "") {
-    const node = document.createElement(tag);
-    node.textContent = content == null ? "" : String(content);
-    if (className) node.className = className;
-    return node;
+  function t(key) {
+    return window.I18N?.[language]?.[key]
+      || window.I18N?.he?.[key]
+      || key;
   }
 
-  function button(label, action, className = "") {
-    const node = make("button", label, className);
-    node.type = "button";
-    node.addEventListener("click", action);
-    return node;
+  function textElement(
+    tag,
+    value = "",
+    className = ""
+  ) {
+    const element =
+      document.createElement(tag);
+
+    element.textContent =
+      value == null ? "" : String(value);
+
+    if (className) {
+      element.className = className;
+    }
+
+    return element;
   }
 
-  async function api(path) {
-    const response = await fetch(path);
+  function createButton(
+    label,
+    action,
+    className = ""
+  ) {
+    const button = textElement(
+      "button",
+      label,
+      className
+    );
+
+    button.type = "button";
+    button.addEventListener(
+      "click",
+      action
+    );
+
+    return button;
+  }
+
+  function titleKey(item) {
+    return [
+      item.source || "local",
+      item.kind,
+      item.id
+    ].join(":");
+  }
+
+  function uniqueItems(items) {
+    const seen = new Set();
+
+    return items.filter(item => {
+      const key = titleKey(item);
+
+      if (seen.has(key)) return false;
+
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function normalize(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(
+        /[^a-z0-9\u0590-\u05ff]/g,
+        ""
+      );
+  }
+
+  function escapeAge(item) {
+    if (!profile) return false;
+
+    const age = Number(profile.age);
+
+    if (!Number.isFinite(age)) {
+      return false;
+    }
+
+    if (item.min_age == null) {
+      return age >= 18;
+    }
+
+    return Number(item.min_age) <= age;
+  }
+
+  function showToast(message) {
+    const toast = $("toast");
+
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+
+    clearTimeout(showToast.timer);
+
+    showToast.timer = setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 2400);
+  }
+
+  async function getAPI(url) {
+    const response = await fetch(url);
+
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "API error");
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "API error"
+      );
+    }
+
     return data;
   }
 
-  function keyFor(item) {
-    return `${item.source || "local"}:${item.kind}:${item.id}`;
-  }
+  // ========================================
+  // Profile
+  // ========================================
 
-  function eligible(item) {
-    if (!profile) return false;
+  function applyProfileTheme() {
+    const avatar =
+      AVATARS.find(
+        x => x.id === profile?.avatar
+      ) || AVATARS[0];
 
-    // Unknown ratings are excluded for children.
-    if (item.min_age == null) {
-      return profile.age >= 18;
+    document.documentElement.style
+      .setProperty(
+        "--accent",
+        avatar.color
+      );
+
+    if ($("profileAvatar")) {
+      $("profileAvatar").textContent =
+        avatar.icon;
     }
 
-    return Number(item.min_age) <= profile.age;
+    if ($("heroSymbol")) {
+      $("heroSymbol").textContent =
+        avatar.icon;
+    }
+
+    if ($("profileUsername")) {
+      $("profileUsername").textContent =
+        profile?.username || "Profile";
+    }
+
+    if ($("welcome")) {
+      $("welcome").textContent = profile
+        ? (
+            language === "he"
+              ? `היי ${profile.username}! מה נראה היום?`
+              : `Hi ${profile.username}! What should we watch?`
+          )
+        : "MovieMatch";
+    }
   }
 
-  function avatar() {
-    return AVATARS.find(x => x.id === selectedAvatar) || AVATARS[0];
-  }
-
-  function setTheme() {
-    const chosen = AVATARS.find(
-      x => x.id === profile?.avatar
-    ) || AVATARS[0];
-
-    document.documentElement.style.setProperty(
-      "--accent", chosen.color
-    );
-
-    $("profileAvatar").textContent = chosen.icon;
-    $("heroSymbol").textContent = chosen.icon;
-    $("profileUsername").textContent = profile?.username || "Profile";
-
-    $("welcome").textContent = profile
-      ? (language === "he"
-          ? `היי ${profile.username}! מה נראה היום?`
-          : `Hi ${profile.username}! What are we watching?`)
-      : "MovieMatch";
-  }
-
-  function translate() {
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === "he" ? "rtl" : "ltr";
-    $("language").value = language;
-
-    $$("[data-i18n]").forEach(node => {
-      node.textContent = text(node.dataset.i18n);
-    });
-
-    $$("[data-placeholder]").forEach(node => {
-      node.placeholder = text(node.dataset.placeholder);
-    });
-
-    $("pageTitle").textContent = text(
-      currentPage === "recommended" ? "recommended" : currentPage
-    );
-
-    setTheme();
-    render();
-  }
-
-  function drawAvatars() {
+  function renderAvatars() {
     const target = $("avatarChoices");
+
+    if (!target) return;
+
     target.replaceChildren();
 
-    AVATARS.forEach(choice => {
-      const b = make("button", choice.icon, "avatar-choice");
-      b.type = "button";
-      b.title = choice.name;
-      b.setAttribute("aria-label", choice.name);
+    AVATARS.forEach(avatar => {
+      const button = createButton(
+        avatar.icon,
+        () => {
+          selectedAvatar = avatar.id;
 
-      if (selectedAvatar === choice.id) {
-        b.classList.add("selected");
+          document.documentElement.style
+            .setProperty(
+              "--accent",
+              avatar.color
+            );
+
+          renderAvatars();
+        },
+        "avatar-choice"
+      );
+
+      button.title = avatar.name;
+      button.setAttribute(
+        "aria-label",
+        avatar.name
+      );
+
+      if (selectedAvatar === avatar.id) {
+        button.classList.add("selected");
       }
 
-      b.addEventListener("click", () => {
-        selectedAvatar = choice.id;
-
-        document.documentElement.style.setProperty(
-          "--accent", choice.color
-        );
-
-        drawAvatars();
-      });
-
-      target.appendChild(b);
+      target.append(button);
     });
   }
 
   function openProfile() {
-    $("profileDropdown").classList.add("hidden");
+    $("profileDropdown")
+      ?.classList.add("hidden");
 
-    $("username").value = profile?.username || "";
-    $("age").value = profile?.age || 14;
-    $("country").value = profile?.country || "IL";
+    $("username").value =
+      profile?.username || "";
 
-    selectedAvatar = profile?.avatar || "spider";
+    $("age").value =
+      profile?.age || 14;
 
-    $("closeProfile").classList.toggle(
-      "hidden", !profile
-    );
+    $("country").value =
+      profile?.country || "IL";
+
+    selectedAvatar =
+      profile?.avatar || "spider";
 
     $("profileError").textContent = "";
-    drawAvatars();
 
-    $("profileModal").classList.remove("hidden");
+    $("closeProfile").classList.toggle(
+      "hidden",
+      !profile
+    );
+
+    renderAvatars();
+
+    $("profileModal")
+      .classList.remove("hidden");
+  }
+
+  function closeProfile() {
+    if (!profile) return;
+
+    $("profileModal")
+      .classList.add("hidden");
+
+    applyProfileTheme();
   }
 
   function saveProfile() {
-    const username = $("username").value.trim();
-    const age = Number($("age").value);
+    const username =
+      $("username").value.trim();
 
-    if (!username || !Number.isInteger(age) ||
-        age < 1 || age > 100) {
-      $("profileError").textContent = text("invalidProfile");
+    const age = Number(
+      $("age").value
+    );
+
+    if (
+      !username ||
+      !Number.isInteger(age) ||
+      age < 1 ||
+      age > 100
+    ) {
+      $("profileError").textContent =
+        t("invalidProfile");
+
       return;
     }
 
@@ -190,312 +396,513 @@
       avatar: selectedAvatar
     };
 
-    localStorage.setItem(
-      KEYS.profile, JSON.stringify(profile)
+    saveStorage(
+      KEYS.profile,
+      profile
     );
 
-    $("profileModal").classList.add("hidden");
+    $("profileModal")
+      .classList.add("hidden");
 
-    setTheme();
-    render();
-    notify(text("saved"));
+    applyProfileTheme();
+    renderEverything();
+
+    showToast(t("saved"));
   }
 
-  function notify(message) {
-    const toast = $("toast");
-    toast.textContent = message;
-    toast.classList.remove("hidden");
+  // ========================================
+  // Language
+  // ========================================
 
-    clearTimeout(notify.timer);
-    notify.timer = setTimeout(() => {
-      toast.classList.add("hidden");
-    }, 2400);
+  function translateInterface() {
+    document.documentElement.lang =
+      language;
+
+    document.documentElement.dir =
+      language === "he"
+        ? "rtl"
+        : "ltr";
+
+    $("language").value = language;
+
+    $$("[data-i18n]").forEach(element => {
+      element.textContent =
+        t(element.dataset.i18n);
+    });
+
+    $$("[data-placeholder]").forEach(
+      element => {
+        element.placeholder =
+          t(element.dataset.placeholder);
+      }
+    );
+
+    if ($("pageTitle")) {
+      $("pageTitle").textContent =
+        t(currentPage);
+    }
+
+    applyProfileTheme();
+    renderEverything();
   }
+
+  // ========================================
+  // Navigation
+  // ========================================
 
   function navigate(page) {
     currentPage = page;
 
-    $$(".page").forEach(node => {
-      node.classList.toggle("active", node.id === `page-${page}`);
+    $$(".page").forEach(element => {
+      element.classList.toggle(
+        "active",
+        element.id === `page-${page}`
+      );
     });
 
-    $$(".nav").forEach(node => {
-      node.classList.toggle("active", node.dataset.page === page);
+    $$("[data-page]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
     });
 
-    $("pageTitle").textContent = text(page);
-    $("sidebar").classList.remove("open");
+    if ($("pageTitle")) {
+      $("pageTitle").textContent =
+        t(page);
+    }
+
+    $("sidebar")
+      ?.classList.remove("open");
+
     window.scrollTo(0, 0);
 
-    render();
+    renderEverything();
   }
 
-  function toggleList(item) {
-    const key = keyFor(item);
+  // ========================================
+  // Watchlist and watched movies
+  // ========================================
 
-    watchlist = watchlist.includes(key)
-      ? watchlist.filter(x => x !== key)
-      : [...watchlist, key];
+  function toggleWatchlist(item) {
+    const key = titleKey(item);
 
-    localStorage.setItem(
-      KEYS.list, JSON.stringify(watchlist)
+    if (watchlist.includes(key)) {
+      watchlist = watchlist.filter(
+        x => x !== key
+      );
+
+      showToast(t("remove"));
+    } else {
+      watchlist.push(key);
+      showToast(t("add"));
+    }
+
+    saveStorage(
+      KEYS.list,
+      watchlist
     );
 
-    render();
+    renderEverything();
 
-    if (!$("movieModal").classList.contains("hidden")) {
+    if (
+      currentMovie &&
+      titleKey(currentMovie) === key
+    ) {
       showDetails(item);
     }
   }
 
   function toggleWatched(item) {
-    const key = keyFor(item);
+    const key = titleKey(item);
 
-    watched = watched.includes(key)
-      ? watched.filter(x => x !== key)
-      : [...watched, key];
+    if (watched.includes(key)) {
+      watched = watched.filter(
+        x => x !== key
+      );
+    } else {
+      watched.push(key);
+    }
 
-    localStorage.setItem(
-      KEYS.watched, JSON.stringify(watched)
+    saveStorage(
+      KEYS.watched,
+      watched
     );
 
-    render();
+    renderEverything();
     showDetails(item);
   }
 
+  // ========================================
+  // Movie posters and cards
+  // ========================================
+
   function makePoster(item) {
-    const wrap = make("div", "", "poster");
+    const poster = textElement(
+      "div",
+      "",
+      "poster"
+    );
 
     if (item.poster) {
-      const img = document.createElement("img");
-      img.src = item.poster;
-      img.alt = item.title;
-      img.loading = "lazy";
+      const image =
+        document.createElement("img");
 
-      img.onerror = () => {
-        img.remove();
-        wrap.prepend(make(
-          "div", "🎬", "poster-placeholder"
-        ));
+      image.src = item.poster;
+      image.alt = item.title;
+      image.loading = "lazy";
+
+      image.onerror = () => {
+        image.remove();
+
+        poster.prepend(
+          textElement(
+            "div",
+            item.kind === "tv"
+              ? "📺"
+              : "🎬",
+            "poster-placeholder"
+          )
+        );
       };
 
-      wrap.append(img);
+      poster.append(image);
     } else {
-      wrap.append(make(
-        "div", item.kind === "tv" ? "📺" : "🎬",
-        "poster-placeholder"
-      ));
+      poster.append(
+        textElement(
+          "div",
+          item.kind === "tv"
+            ? "📺"
+            : "🎬",
+          "poster-placeholder"
+        )
+      );
     }
 
-    return wrap;
+    return poster;
   }
 
-  function makeCard(item) {
-    const card = make("article", "", "movie-card");
+  function makeMovieCard(item) {
+    const card = textElement(
+      "article",
+      "",
+      "movie-card"
+    );
+
     const poster = makePoster(item);
 
-    poster.addEventListener("click", () => {
-      showDetails(item);
-    });
+    poster.addEventListener(
+      "click",
+      () => showDetails(item)
+    );
 
-    const isSaved = watchlist.includes(keyFor(item));
+    const saved = watchlist.includes(
+      titleKey(item)
+    );
 
-    const add = button(
-      isSaved ? "−" : "+",
+    const addButton = createButton(
+      saved ? "−" : "+",
       event => {
         event.stopPropagation();
-        toggleList(item);
+        toggleWatchlist(item);
       },
       "add-button"
     );
 
-    add.title = isSaved ? text("remove") : text("add");
-    add.setAttribute("aria-label", add.title);
-    poster.append(add);
+    addButton.title = saved
+      ? t("remove")
+      : t("add");
+
+    addButton.setAttribute(
+      "aria-label",
+      addButton.title
+    );
+
+    poster.append(addButton);
+
+    const title = textElement(
+      "div",
+      item.title,
+      "movie-title"
+    );
+
+    const subtitle = textElement(
+      "div",
+      `${item.year || "—"} · ${
+        item.kind === "tv"
+          ? t("shows")
+          : t("movies")
+      }`,
+      "movie-subtitle"
+    );
 
     card.append(
       poster,
-      make("div", item.title, "movie-title"),
-      make(
-        "div",
-        `${item.year || "—"} · ${item.kind === "tv" ?
-          text("shows") : text("movies")}`,
-        "movie-subtitle"
-      )
+      title,
+      subtitle
     );
 
     return card;
   }
 
-  function showGrid(id, items, limit = 100) {
+  function renderGrid(
+    id,
+    items,
+    limit = 120
+  ) {
     const target = $(id);
+
+    if (!target) return;
+
     target.replaceChildren();
 
-    const visible = items.filter(eligible).slice(0, limit);
+    const visible = uniqueItems(items)
+      .filter(escapeAge)
+      .slice(0, limit);
 
     if (!visible.length) {
-      target.append(make("p", text("noResults"), "muted"));
+      const key =
+        id === "watchlistGrid"
+          ? "noList"
+          : id === "watchedGrid"
+            ? "noWatched"
+            : "noResults";
+
+      target.append(
+        textElement(
+          "p",
+          t(key),
+          "muted"
+        )
+      );
+
       return;
     }
 
     visible.forEach(item => {
-      target.append(makeCard(item));
+      target.append(
+        makeMovieCard(item)
+      );
     });
   }
 
-  function unique(items) {
-    const keys = new Set();
+  // ========================================
+  // Details modal
+  // ========================================
 
-    return items.filter(item => {
-      const key = keyFor(item);
-      if (keys.has(key)) return false;
-      keys.add(key);
-      return true;
-    });
-  }
-
-  function render() {
-    showGrid(
-      "marvelGrid",
-      catalog.filter(item => item.group === "marvel"),
-      16
-    );
-
-    showGrid(
-      "seriesGrid",
-      catalog.filter(item => item.kind === "tv"),
-      16
-    );
-
-    showGrid(
-      "watchlistGrid",
-      catalog.filter(item =>
-        watchlist.includes(keyFor(item))
-      )
-    );
-
-    showGrid(
-      "watchedGrid",
-      catalog.filter(item =>
-        watched.includes(keyFor(item))
-      )
-    );
-  }
-
-  async function showDetails(item) {
+  function showDetails(item) {
     currentMovie = item;
+
     const target = $("movieDetails");
     target.replaceChildren();
 
-    const title = make("h2", item.title);
-    const layout = make("div", "", "movie-info");
-    const poster = makePoster(item);
-    const info = make("div");
-
-    poster.className = "detail-poster";
-
-    info.append(
-      make("p", `${item.year || "—"} · ${item.kind === "tv" ?
-        text("shows") : text("movies")}`, "muted"),
-      make(
-        "p",
-        item.min_age == null
-          ? text("ageUnknown")
-          : `${item.min_age}+ · ${text("ageEstimate")}`,
-        "muted"
-      ),
-      make("h3", text("synopsis")),
-      make("p", item.summary || "—")
+    const title = textElement(
+      "h2",
+      item.title
     );
 
-    const actions = make("div", "", "detail-actions");
+    const layout = textElement(
+      "div",
+      "",
+      "movie-info"
+    );
 
-    const inList = watchlist.includes(keyFor(item));
-    const hasWatched = watched.includes(keyFor(item));
+    const poster = makePoster(item);
+
+    poster.className =
+      "detail-poster";
+
+    const info = textElement("div");
+
+    info.append(
+      textElement(
+        "p",
+        `${item.year || "—"} · ${
+          item.kind === "tv"
+            ? t("shows")
+            : t("movies")
+        }`,
+        "muted"
+      )
+    );
+
+    info.append(
+      textElement(
+        "p",
+        item.min_age == null
+          ? t("ageUnknown")
+          : `${item.min_age}+ · ${t("ageEstimate")}`,
+        "muted"
+      )
+    );
+
+    info.append(
+      textElement(
+        "h3",
+        t("synopsis")
+      )
+    );
+
+    info.append(
+      textElement(
+        "p",
+        item.summary || "—"
+      )
+    );
+
+    const actions = textElement(
+      "div",
+      "",
+      "detail-actions"
+    );
+
+    const inList = watchlist.includes(
+      titleKey(item)
+    );
+
+    const seen = watched.includes(
+      titleKey(item)
+    );
 
     actions.append(
-      button(
-        inList ? `− ${text("remove")}` : `+ ${text("add")}`,
-        () => toggleList(item)
-      ),
-      button(
-        hasWatched
-          ? text("removeWatched")
-          : text("markWatched"),
+      createButton(
+        inList
+          ? `− ${t("remove")}`
+          : `+ ${t("add")}`,
+        () => toggleWatchlist(item)
+      )
+    );
+
+    actions.append(
+      createButton(
+        seen
+          ? t("removeWatched")
+          : t("markWatched"),
         () => toggleWatched(item)
       )
     );
 
     info.append(actions);
 
-    if (item.watch_orders?.release?.length) {
-      info.append(make("h3", text("releaseOrder")));
+    if (
+      item.watch_orders?.release?.length
+    ) {
+      info.append(
+        textElement(
+          "h3",
+          t("releaseOrder")
+        )
+      );
 
-      const list = document.createElement("ol");
+      const order =
+        document.createElement("ol");
 
-      item.watch_orders.release.forEach(name => {
-        list.append(make("li", name));
-      });
+      item.watch_orders.release
+        .forEach(name => {
+          order.append(
+            textElement("li", name)
+          );
+        });
 
-      info.append(list);
+      info.append(order);
     }
 
-    info.append(make("h3", text("whereToWatch")));
-    info.append(make("p", text("availabilityUnknown"), "muted"));
+    info.append(
+      textElement(
+        "h3",
+        t("whereToWatch")
+      )
+    );
+
+    info.append(
+      textElement(
+        "p",
+        t("availabilityUnknown"),
+        "muted"
+      )
+    );
 
     layout.append(poster, info);
     target.append(title, layout);
 
-    $("movieModal").classList.remove("hidden");
+    $("movieModal")
+      .classList.remove("hidden");
+
+    // Additional TMDB information and posters
+    // are loaded by upgrade.js.
 
     if (item.source === "tmdb") {
-      try {
-        const query = new URLSearchParams({
-          kind: item.kind,
-          id: item.id,
-          region: profile?.country || "IL",
-          language: language === "he" ? "he-IL" : "en-US"
-        });
-
-        const details = await api(`/api/details?${query}`);
-
-        if (currentMovie !== item) return;
-
-        if (details.providers?.length) {
-          info.append(make(
-            "p", details.providers.join(", ")
-          ));
-        }
-
-        if (details.link) {
-          const link = make("a", text("whereToWatch"));
-          link.href = details.link;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          info.append(link);
-        }
-
-        if (details.collection?.length) {
-          info.append(make("h3", text("releaseOrder")));
-
-          const ol = document.createElement("ol");
-
-          details.collection.forEach(name => {
-            ol.append(make("li", name));
-          });
-
-          info.append(ol);
-        }
-
-      } catch (error) {
-        console.warn("TMDB details unavailable:", error);
-      }
+      loadExternalDetails(item, info);
     }
   }
 
+  async function loadExternalDetails(
+    item,
+    container
+  ) {
+    try {
+      const query = new URLSearchParams({
+        kind: item.kind,
+        id: item.id,
+        region: profile?.country || "IL",
+        language:
+          language === "he"
+            ? "he-IL"
+            : "en-US"
+      });
+
+      const data = await getAPI(
+        `/api/details?${query}`
+      );
+
+      if (
+        !currentMovie ||
+        titleKey(currentMovie) !==
+          titleKey(item)
+      ) {
+        return;
+      }
+
+      if (data.providers?.length) {
+        container.append(
+          textElement(
+            "p",
+            data.providers.join(", ")
+          )
+        );
+      }
+
+      if (data.link) {
+        const link =
+          document.createElement("a");
+
+        link.textContent =
+          t("whereToWatch");
+
+        link.href = data.link;
+        link.target = "_blank";
+        link.rel =
+          "noopener noreferrer";
+
+        container.append(link);
+      }
+
+    } catch (error) {
+      console.warn(
+        "Details unavailable:",
+        error
+      );
+    }
+  }
+
+  // ========================================
+  // Smart search with typo correction
+  // ========================================
+
   function levenshtein(a, b) {
     const row = Array.from(
-      {length:b.length + 1}, (_,i) => i
+      {length: b.length + 1},
+      (_, i) => i
     );
 
     for (let i = 1; i <= a.length; i++) {
@@ -503,242 +910,541 @@
       row[0] = i;
 
       for (let j = 1; j <= b.length; j++) {
-        const old = row[j];
+        const original = row[j];
 
         row[j] = Math.min(
           row[j] + 1,
           row[j - 1] + 1,
-          previous + (a[i - 1] === b[j - 1] ? 0 : 1)
+          previous +
+            (a[i - 1] === b[j - 1]
+              ? 0
+              : 1)
         );
 
-        previous = old;
+        previous = original;
       }
     }
 
     return row[b.length];
   }
 
-  function normalize(value) {
-    return String(value)
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0590-\u05ff]/g, "");
-  }
-
-  function localSearch(query) {
+  function searchLocally(query) {
     const q = normalize(query);
 
-    if (!q) return {items:[], correction:null};
+    if (!q) {
+      return {
+        items: [],
+        correction: null
+      };
+    }
 
-    const results = [];
+    const matches = [];
 
     catalog.forEach(item => {
-      const candidates = [
+      const names = [
         item.title,
         ...(item.aliases || []),
         ...(item.tags || [])
       ];
 
       let best = 0;
-      let typo = false;
+      let corrected = false;
 
-      candidates.forEach(candidate => {
-        const name = normalize(candidate);
+      for (const candidate of names) {
+        const value =
+          normalize(candidate);
 
-        if (!name) return;
+        if (!value) continue;
 
-        if (name.includes(q) || q.includes(name)) {
-          best = Math.max(best, 100);
-          return;
+        if (
+          value.includes(q) ||
+          q.includes(value)
+        ) {
+          best = 100;
+          corrected = false;
+          break;
         }
 
-        const distance = levenshtein(q, name);
+        if (q.length >= 4) {
+          const distance =
+            levenshtein(q, value);
 
-        if (distance <= 2 && q.length >= 4) {
-          best = Math.max(best, 70 - distance * 10);
-          typo = true;
+          if (
+            distance <= 2 &&
+            best < 80
+          ) {
+            best =
+              80 - distance * 10;
+
+            corrected = true;
+          }
         }
-      });
+      }
 
-      if (best > 0) results.push({item, score:best, typo});
+      if (best > 0) {
+        matches.push({
+          item,
+          score: best,
+          corrected
+        });
+      }
     });
 
-    results.sort((a,b) => b.score - a.score);
+    matches.sort(
+      (a, b) => b.score - a.score
+    );
 
     return {
-      items: results.map(x => x.item),
-      correction: results[0]?.typo
-        ? results[0].item.title
-        : null
+      items: matches.map(x => x.item),
+      correction:
+        matches[0]?.corrected
+          ? matches[0].item.title
+          : null
     };
   }
 
   async function search() {
-    const query = $("searchInput").value.trim();
-    const kind = $("searchType").value;
+    const query =
+      $("searchInput").value.trim();
+
+    const kind =
+      $("searchType").value;
+
+    const thisRequest =
+      ++searchRequestId;
 
     if (!query) {
-      $("searchGrid").replaceChildren();
-      $("correction").classList.add("hidden");
+      currentSearch = [];
+      currentCorrection = null;
+      renderSearch();
       return;
     }
 
-    const result = localSearch(query);
+    const local =
+      searchLocally(query);
 
-    let items = result.items;
+    let items = [...local.items];
+    let correction = local.correction;
 
     try {
-      const qs = new URLSearchParams({
-        q: query,
-        language: language === "he" ? "he-IL" : "en-US"
-      });
+      const params =
+        new URLSearchParams({
+          q: query,
+          language:
+            language === "he"
+              ? "he-IL"
+              : "en-US"
+        });
 
-      const online = await api(`/api/search?${qs}`);
-      const existing = new Set(items.map(keyFor));
+      const data = await getAPI(
+        `/api/search?${params}`
+      );
 
-      (online.items || []).forEach(item => {
-        if (!existing.has(keyFor(item))) {
-          items.push(item);
-          existing.add(keyFor(item));
-        }
-      });
-
-      if (!result.correction && online.corrected) {
-        result.correction = online.corrected;
+      if (
+        thisRequest !== searchRequestId
+      ) {
+        return;
       }
+
+      items = uniqueItems([
+        ...items,
+        ...(data.items || [])
+      ]);
+
+      if (
+        !correction &&
+        data.corrected
+      ) {
+        correction = data.corrected;
+      }
+
     } catch (error) {
-      console.warn("Using local search:", error);
+      console.warn(
+        "Online search unavailable:",
+        error
+      );
+    }
+
+    if (
+      thisRequest !== searchRequestId
+    ) {
+      return;
     }
 
     if (kind !== "both") {
-      items = items.filter(item => item.kind === kind);
+      items = items.filter(
+        item => item.kind === kind
+      );
     }
 
-    if (result.correction) {
-      $("correction").textContent =
-        `${text("correction")} ${result.correction}`;
+    currentSearch = items;
+    currentCorrection = correction;
 
-      $("correction").classList.remove("hidden");
-    } else {
-      $("correction").classList.add("hidden");
-    }
-
-    showGrid("searchGrid", unique(items), 80);
+    renderSearch();
   }
 
+  function renderSearch() {
+    const correction =
+      $("correction");
+
+    if (currentCorrection) {
+      correction.textContent =
+        `${t("correction")} ${currentCorrection}`;
+
+      correction.classList.remove(
+        "hidden"
+      );
+    } else {
+      correction.classList.add(
+        "hidden"
+      );
+    }
+
+    renderGrid(
+      "searchGrid",
+      currentSearch,
+      120
+    );
+  }
+
+  // ========================================
+  // Personalized recommendations
+  // ========================================
+
   function recommend() {
-    const chosen = $$("#interests button.active")
-      .map(b => b.dataset.theme);
+    const selected =
+      $$("#interests button.active")
+        .map(button =>
+          button.dataset.theme
+        );
 
-    const free = normalize($("favoriteText").value);
+    const description =
+      normalize(
+        $("favoriteText").value
+      );
 
-    const scored = catalog
-      .filter(eligible)
+    const ranked = catalog
+      .filter(escapeAge)
       .map(item => {
-        const themes = item.themes || [];
-        const haystack = normalize([
+        const themes =
+          item.themes || [];
+
+        let score =
+          Number(item.popularity || 0)
+          / 10;
+
+        selected.forEach(theme => {
+          if (themes.includes(theme)) {
+            score += 50;
+          }
+        });
+
+        const combined = normalize([
           item.title,
           ...(item.aliases || []),
           ...(item.tags || [])
         ].join(" "));
 
-        let score = (item.popularity || 0) / 10;
-
-        chosen.forEach(theme => {
-          if (themes.includes(theme)) score += 50;
-        });
-
-        if (free && haystack.includes(free)) {
+        if (
+          description &&
+          (
+            combined.includes(description) ||
+            description.includes(
+              normalize(item.title)
+            )
+          )
+        ) {
           score += 100;
         }
 
         return {item, score};
       })
-      .sort((a,b) => b.score - a.score);
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      );
 
-    showGrid(
-      "recommendGrid",
-      scored.map(x => x.item),
-      24
+    currentRecommendations =
+      ranked.map(x => x.item);
+
+    navigate("recommended");
+  }
+
+  // ========================================
+  // Netflix and Marvel lists
+  // ========================================
+
+  function marvelTitles() {
+    return catalog.filter(
+      item => item.group === "marvel"
     );
   }
 
+  function netflixTitles() {
+    return catalog.filter(
+      item => item.group === "netflix"
+    );
+  }
+
+  function seriesTitles() {
+    return catalog.filter(
+      item => item.kind === "tv"
+    );
+  }
+
+  function watchedTitles() {
+    return catalog.filter(
+      item =>
+        watched.includes(
+          titleKey(item)
+        )
+    );
+  }
+
+  function savedTitles() {
+    return catalog.filter(
+      item =>
+        watchlist.includes(
+          titleKey(item)
+        )
+    );
+  }
+
+  function showNetflix() {
+    navigate("search");
+
+    $("searchInput").value =
+      "Netflix";
+
+    $("searchType").value =
+      "both";
+
+    search();
+  }
+
+  function showMarvel() {
+    navigate("search");
+
+    $("searchInput").value =
+      "Marvel";
+
+    $("searchType").value =
+      "both";
+
+    search();
+  }
+
+  // ========================================
+  // Render all pages
+  // ========================================
+
+  function renderEverything() {
+    if (!profile) return;
+
+    renderGrid(
+      "marvelGrid",
+      marvelTitles(),
+      16
+    );
+
+    renderGrid(
+      "seriesGrid",
+      seriesTitles(),
+      16
+    );
+
+    renderGrid(
+      "watchlistGrid",
+      savedTitles()
+    );
+
+    renderGrid(
+      "watchedGrid",
+      watchedTitles()
+    );
+
+    renderSearch();
+
+    renderGrid(
+      "recommendGrid",
+      currentRecommendations,
+      36
+    );
+  }
+
+  // ========================================
+  // Load catalog from Python server
+  // ========================================
+
   async function loadCatalog() {
     try {
-      const data = await api("/api/catalog");
-      catalog = data.items || [];
-      render();
+      const data = await getAPI(
+        "/api/catalog"
+      );
+
+      catalog =
+        data.items || [];
+
+      console.log(
+        "MovieMatch titles loaded:",
+        catalog.length
+      );
+
+      renderEverything();
+
     } catch (error) {
-      console.error(error);
-      notify("Could not load catalog");
+      console.error(
+        "Catalog loading failed:",
+        error
+      );
+
+      showToast(
+        "Could not load the catalog"
+      );
     }
   }
 
+  // ========================================
+  // Start application
+  // ========================================
+
   function init() {
-    $$("[data-page]").forEach(b => {
-      b.addEventListener("click", () => {
-        navigate(b.dataset.page);
-      });
-    });
+    // Navigation
+    $$("[data-page]").forEach(
+      button => {
+        button.addEventListener(
+          "click",
+          () => navigate(
+            button.dataset.page
+          )
+        );
+      }
+    );
 
+    // Mobile menu
     $("menuToggle").onclick = () => {
-      $("sidebar").classList.toggle("open");
+      $("sidebar")
+        .classList.toggle("open");
     };
 
+    // Profile dropdown
     $("profileButton").onclick = () => {
-      $("profileDropdown").classList.toggle("hidden");
+      $("profileDropdown")
+        .classList.toggle("hidden");
     };
 
-    $("editProfile").onclick = openProfile;
-    $("switchProfile").onclick = openProfile;
-    $("closeProfile").onclick = () => {
-      if (profile) $("profileModal").classList.add("hidden");
-    };
+    $("editProfile").onclick =
+      openProfile;
 
-    $("saveProfile").onclick = saveProfile;
+    $("switchProfile").onclick =
+      openProfile;
 
-    $("discoverMarvel").onclick = () => {
-      navigate("search");
-      $("searchInput").value = "Marvel";
-      search();
-    };
+    $("closeProfile").onclick =
+      closeProfile;
 
-    $("moreMarvel").onclick = $("discoverMarvel").onclick;
+    $("saveProfile").onclick =
+      saveProfile;
 
-    $("searchButton").onclick = search;
-    $("searchType").onchange = search;
+    // Explore Marvel
+    $("discoverMarvel").onclick =
+      showMarvel;
 
-    $("searchInput").onkeydown = event => {
-      if (event.key === "Enter") search();
-    };
+    $("moreMarvel").onclick =
+      showMarvel;
+
+    // Search
+    $("searchButton").onclick =
+      search;
+
+    $("searchType").onchange =
+      search;
+
+    $("searchInput").onkeydown =
+      event => {
+        if (event.key === "Enter") {
+          search();
+        }
+      };
 
     let searchDelay;
+
     $("searchInput").oninput = () => {
       clearTimeout(searchDelay);
-      searchDelay = setTimeout(search, 350);
+
+      searchDelay = setTimeout(
+        search,
+        350
+      );
     };
 
-    $$("#interests button").forEach(b => {
-      b.onclick = () => b.classList.toggle("active");
-    });
+    // Interests
+    $$("#interests button").forEach(
+      button => {
+        button.onclick = () => {
+          button.classList.toggle(
+            "active"
+          );
+        };
+      }
+    );
 
-    $("recommendButton").onclick = recommend;
+    $("recommendButton").onclick =
+      recommend;
 
+    // Close movie details
     $("closeMovie").onclick = () => {
-      $("movieModal").classList.add("hidden");
+      $("movieModal")
+        .classList.add("hidden");
+
       currentMovie = null;
     };
 
-    $("language").onchange = event => {
-      language = event.target.value;
-      localStorage.setItem(KEYS.language, language);
-      translate();
-    };
+    // Language
+    $("language").onchange =
+      event => {
+        language =
+          event.target.value;
 
-    translate();
+        localStorage.setItem(
+          KEYS.language,
+          language
+        );
+
+        translateInterface();
+      };
+
+    // Close profile dropdown when
+    // clicking outside it
+    document.addEventListener(
+      "click",
+      event => {
+        const area =
+          document.querySelector(
+            ".profile-area"
+          );
+
+        if (
+          area &&
+          !area.contains(event.target)
+        ) {
+          $("profileDropdown")
+            .classList.add("hidden");
+        }
+      }
+    );
+
+    translateInterface();
+
     loadCatalog();
 
-    if (!profile) openProfile();
+    // Profile setup on first entry
+    if (!profile) {
+      openProfile();
+    }
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
 })();
