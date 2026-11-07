@@ -4,220 +4,251 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1020">
-  <title>MovieMatch | Discover your next favorite</title>
+  <title>MovieMatch</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/i18n.js" defer></script>
   <script src="/js/main.js" defer></script>
 </head>
-
 <body>
-  <header class="header">
-    <a href="/" class="logo">✦ Movie<span>Match</span></a>
-    <nav>
-      <a href="#discover" data-i18n="navDiscover">גלה תוכן</a>
-      <a href="#watchlist" data-i18n="navWatchlist">הרשימה שלי</a>
-    </nav>
-    <div class="header-actions">
-      <select id="language" aria-label="Language">
+
+<aside id="sidebar" class="sidebar">
+  <div class="logo">✦ Movie<span>Match</span></div>
+
+  <nav id="navigation">
+    <button data-page="home" class="nav active">
+      <span>⌂</span><b data-i18n="home">בית</b>
+    </button>
+    <button data-page="search" class="nav">
+      <span>⌕</span><b data-i18n="search">חיפוש</b>
+    </button>
+    <button data-page="recommended" class="nav">
+      <span>✧</span><b data-i18n="recommended">מומלצים</b>
+    </button>
+    <button data-page="watchlist" class="nav">
+      <span>♡</span><b data-i18n="watchlist">הרשימה שלי</b>
+    </button>
+    <button data-page="watched" class="nav">
+      <span>✓</span><b data-i18n="watched">כבר ראיתי</b>
+    </button>
+  </nav>
+
+  <div class="side-footer">MOVIEMATCH v0.3</div>
+</aside>
+
+<div class="app">
+  <header class="topbar">
+    <button id="menuToggle" class="mobile-menu">☰</button>
+    <strong id="pageTitle">בית</strong>
+
+    <div class="top-right">
+      <select id="language">
         <option value="he">עברית</option>
         <option value="en">English</option>
       </select>
-      <span class="avatar">🎬</span>
+
+      <div class="profile-area">
+        <button id="profileButton" class="profile-button">
+          <span id="profileAvatar">🕷️</span>
+          <span id="profileUsername">Profile</span>
+          <span>⌄</span>
+        </button>
+
+        <div id="profileDropdown" class="dropdown hidden">
+          <button id="editProfile" data-i18n="editProfile">
+            עריכת פרופיל
+          </button>
+          <button id="switchProfile" data-i18n="switchProfile">
+            החלפת פרופיל
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="hero-text">
-        <span class="eyebrow" data-i18n="eyebrow">
-          ההמלצה הבאה שלך
-        </span>
-        <h1 data-i18n="headline">
-          הסרט הבא שתאהב מתחיל כאן.
-        </h1>
-        <p data-i18n="subtitle">
-          ספר לנו מה אתה אוהב ונמצא לך סרט או סדרה.
-        </p>
-        <a href="#discover" class="hero-button" data-i18n="getStarted">
-          בוא נתחיל
-        </a>
-      </div>
-      <div class="hero-art">
-        <span>🍿</span>
-        <span>🎞️</span>
-        <span>✨</span>
-      </div>
-    </section>
+  <main>
 
-    <section class="stats">
-      <div>
-        <strong>2</strong>
-        <span data-i18n="languages">שפות</span>
-      </div>
-      <div>
-        <strong>3</strong>
-        <span data-i18n="threePicks">המלצות בכל חיפוש</span>
-      </div>
-      <div>
-        <strong>24/7</strong>
-        <span data-i18n="available">זמין בכל שעה</span>
-      </div>
-    </section>
-
-    <section id="discover" class="app-layout">
-      <aside class="panel">
-        <div class="panel-heading">
+    <!-- HOME -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div>
           <span class="eyebrow">MOVIEMATCH</span>
-          <h2 data-i18n="question">מה תרצה לגלות היום?</h2>
-          <p data-i18n="formHint">
-            בחר את ההעדפות שלך.
+          <h1 id="welcome">ברוכים הבאים!</h1>
+          <p data-i18n="heroDescription">
+            גלה את הסרטים והסדרות הבאים שתאהב.
           </p>
+          <button class="primary" id="discoverMarvel"
+                  data-i18n="discoverMarvel">
+            גלה את עולם מארוול
+          </button>
         </div>
-
-        <label for="profileName" data-i18n="name">שם הפרופיל</label>
-        <input
-          id="profileName"
-          maxlength="40"
-          placeholder="השם שלך"
-          data-placeholder="namePlaceholder"
-        >
-
-        <div class="two-columns">
-          <div>
-            <label for="age" data-i18n="age">גיל הצופה</label>
-            <input id="age" type="number" min="1" max="100" value="14">
-          </div>
-          <div>
-            <label for="region" data-i18n="country">מדינה</label>
-            <select id="region">
-              <option value="IL">Israel</option>
-              <option value="US">United States</option>
-              <option value="GB">United Kingdom</option>
-              <option value="ES">Spain</option>
-            </select>
-          </div>
-        </div>
-
-        <label data-i18n="contentType">מה מחפשים?</label>
-        <div class="chips single" id="kind">
-          <button type="button" class="active" data-value="both"
-                  data-i18n="surprise">תפתיע אותי</button>
-          <button type="button" data-value="movie"
-                  data-i18n="movies">סרטים</button>
-          <button type="button" data-value="tv"
-                  data-i18n="shows">סדרות</button>
-        </div>
-
-        <label data-i18n="services">שירותי הסטרימינג שלך</label>
-        <div class="chips multi" id="services">
-          <button type="button" data-value="Netflix">Netflix</button>
-          <button type="button" data-value="Disney+">Disney+</button>
-          <button type="button" data-value="Prime Video">Prime Video</button>
-          <button type="button" data-value="Apple TV+">Apple TV+</button>
-          <button type="button" data-value="yes">yes</button>
-          <button type="button" data-value="HOT">HOT</button>
-        </div>
-
-        <label for="taste" data-i18n="taste">איזה סרטים אתה אוהב?</label>
-        <textarea
-          id="taste"
-          rows="3"
-          data-placeholder="tastePlaceholder"
-          placeholder="מארוול, אווטאר, דרקונים..."
-        ></textarea>
-
-        <label data-i18n="themes">מה אתה אוהב בסרטים?</label>
-        <div class="chips multi" id="themes">
-          <button type="button" data-value="action"
-                  data-i18n="action">אקשן</button>
-          <button type="button" data-value="teamwork"
-                  data-i18n="teamwork">עבודת צוות</button>
-          <button type="button" data-value="family"
-                  data-i18n="family">משפחה</button>
-          <button type="button" data-value="friendship"
-                  data-i18n="friendship">חברות</button>
-          <button type="button" data-value="romance"
-                  data-i18n="romance">רומנטיקה</button>
-          <button type="button" data-value="fantasy"
-                  data-i18n="fantasy">פנטזיה</button>
-          <button type="button" data-value="comedy"
-                  data-i18n="comedy">קומדיה</button>
-          <button type="button" data-value="science"
-                  data-i18n="science">מדע</button>
-        </div>
-
-        <label data-i18n="avoid">ממה להימנע?</label>
-        <div class="chips multi" id="avoid">
-          <button type="button" data-value="horror"
-                  data-i18n="horror">אימה</button>
-          <button type="button" data-value="violence"
-                  data-i18n="violence">אלימות</button>
-          <button type="button" data-value="romance"
-                  data-i18n="romance">רומנטיקה</button>
-        </div>
-
-        <button id="recommendBtn" class="primary" type="button"
-                data-i18n="find">
-          ✨ מצא לי מה לראות
-        </button>
-        <button id="saveProfileBtn" class="secondary" type="button"
-                data-i18n="saveProfile">
-          שמור את הפרופיל שלי
-        </button>
-        <p id="status" class="status" role="status"></p>
-      </aside>
-
-      <section class="recommendations">
-        <div class="section-title">
-          <span class="eyebrow" data-i18n="personal">במיוחד בשבילך</span>
-          <h2 data-i18n="resultsTitle">ההמלצות שלך</h2>
-          <p data-i18n="resultsHint">
-            כל המלצה כוללת מידע על הסרט והסבר להתאמה.
-          </p>
-        </div>
-
-        <div id="results" class="movie-grid">
-          <div class="empty" data-i18n="empty">
-            בחר את ההעדפות שלך ולחץ על חיפוש.
-          </div>
-        </div>
-
-        <div class="search-panel">
-          <h3 data-i18n="searchTitle">מחפש סרט מסוים?</h3>
-          <p data-i18n="searchHint">
-            חפש לפי שם. מאגר TMDB דורש חיבור API.
-          </p>
-          <div class="search-row">
-            <input id="searchInput"
-                   data-placeholder="searchPlaceholder"
-                   placeholder="שם הסרט או הסדרה">
-            <button id="searchBtn" type="button"
-                    data-i18n="search">חפש</button>
-          </div>
-          <div id="searchResults"></div>
-        </div>
-      </section>
-    </section>
-
-    <section id="watchlist" class="watchlist-section">
-      <div class="section-title">
-        <span class="eyebrow">MY MOVIEMATCH</span>
-        <h2 data-i18n="myWatchlist">רשימת הצפייה שלי</h2>
+        <div class="hero-symbol" id="heroSymbol">🕷️</div>
       </div>
-      <div id="watchlistItems" class="watchlist-items"></div>
-    </section>
-  </main>
 
-  <footer class="footer">
-    <strong>MovieMatch</strong>
-    <p data-i18n="disclaimer">
-      גרסת הדגמה. גילי הצפייה אינם סיווג רשמי.
+      <div class="section-heading">
+        <h2 data-i18n="marvel">מארוול וגיבורי על</h2>
+        <button class="link-button" id="moreMarvel"
+                data-i18n="seeAll">הצג הכול</button>
+      </div>
+      <div id="marvelGrid" class="poster-grid"></div>
+
+      <div class="section-heading">
+        <h2 data-i18n="series">סדרות מומלצות</h2>
+      </div>
+      <div id="seriesGrid" class="poster-grid"></div>
+    </section>
+
+    <!-- SEARCH -->
+    <section id="page-search" class="page">
+      <h1 data-i18n="smartSearch">חיפוש חכם</h1>
+      <p class="muted" data-i18n="searchDescription">
+        חפש סרט, סדרה או דמות, גם עם טעות כתיב.
+      </p>
+
+      <div class="search-box">
+        <input id="searchInput" type="search"
+               data-placeholder="searchPlaceholder"
+               placeholder="ספיידרמן, מארוול, אווטאר...">
+        <button class="primary" id="searchButton"
+                data-i18n="search">חיפוש</button>
+      </div>
+
+      <div id="correction" class="correction hidden"></div>
+
+      <div class="filters">
+        <select id="searchType">
+          <option value="both" data-i18n="all">הכול</option>
+          <option value="movie" data-i18n="movies">סרטים</option>
+          <option value="tv" data-i18n="shows">סדרות</option>
+        </select>
+      </div>
+
+      <div id="searchGrid" class="poster-grid"></div>
+    </section>
+
+    <!-- RECOMMENDATIONS -->
+    <section id="page-recommended" class="page">
+      <h1 data-i18n="recommended">מומלצים בשבילך</h1>
+      <p class="muted" data-i18n="recommendDescription">
+        בחר מה אתה אוהב ונחפש את התכנים המתאימים.
+      </p>
+
+      <div class="recommend-box">
+        <label data-i18n="yourInterests">מה אתה אוהב?</label>
+
+        <div id="interests" class="chips">
+          <button data-theme="action" data-i18n="action">אקשן</button>
+          <button data-theme="teamwork" data-i18n="teamwork">
+            עבודת צוות
+          </button>
+          <button data-theme="fantasy" data-i18n="fantasy">
+            פנטזיה
+          </button>
+          <button data-theme="comedy" data-i18n="comedy">
+            קומדיה
+          </button>
+          <button data-theme="family" data-i18n="family">
+            משפחה
+          </button>
+          <button data-theme="science" data-i18n="science">
+            מדע
+          </button>
+          <button data-theme="romance" data-i18n="romance">
+            רומנטיקה
+          </button>
+        </div>
+
+        <label for="favoriteText" data-i18n="describe">
+          תאר איזה סרט או סדרה אתה מחפש
+        </label>
+        <textarea id="favoriteText" rows="3"
+          data-placeholder="describePlaceholder"
+          placeholder="אני בן 14, אוהב מארוול והרפתקאות...">
+        </textarea>
+
+        <button id="recommendButton" class="primary"
+                data-i18n="getRecommendations">
+          מצא לי המלצות
+        </button>
+      </div>
+
+      <div id="recommendGrid" class="poster-grid"></div>
+    </section>
+
+    <!-- WATCHLIST -->
+    <section id="page-watchlist" class="page">
+      <h1 data-i18n="watchlist">הרשימה שלי</h1>
+      <p class="muted" data-i18n="listDescription">
+        כאן נמצאים כל הסרטים ששמרת.
+      </p>
+      <div id="watchlistGrid" class="poster-grid"></div>
+    </section>
+
+    <!-- WATCHED -->
+    <section id="page-watched" class="page">
+      <h1 data-i18n="watched">כבר ראיתי</h1>
+      <p class="muted" data-i18n="watchedDescription">
+        כל התכנים שסימנת שכבר צפית בהם.
+      </p>
+      <div id="watchedGrid" class="poster-grid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- PROFILE WINDOW -->
+<div id="profileModal" class="modal-backdrop hidden">
+  <div class="modal profile-modal">
+    <div class="modal-heading">
+      <div>
+        <span class="eyebrow">MOVIEMATCH</span>
+        <h2 data-i18n="createProfile">צור פרופיל אישי</h2>
+      </div>
+      <button id="closeProfile" class="close">✕</button>
+    </div>
+
+    <p data-i18n="chooseAvatar">
+      בחר דמות שתייצג אותך
     </p>
-    <p>
-      This product uses the TMDB API but is not
-      endorsed or certified by TMDB.
-    </p>
-  </footer>
+    <div id="avatarChoices" class="avatar-grid"></div>
+
+    <div class="two-fields">
+      <div>
+        <label for="username" data-i18n="username">
+          שם משתמש
+        </label>
+        <input id="username" maxlength="32"
+               placeholder="Username">
+      </div>
+      <div>
+        <label for="age" data-i18n="age">גיל</label>
+        <input id="age" type="number" min="1" max="100"
+               value="14">
+      </div>
+    </div>
+
+    <label for="country" data-i18n="country">מדינה</label>
+    <select id="country">
+      <option value="IL">ישראל</option>
+      <option value="US">United States</option>
+      <option value="GB">United Kingdom</option>
+      <option value="ES">España</option>
+    </select>
+
+    <p id="profileError" class="error"></p>
+    <button id="saveProfile" class="primary full"
+            data-i18n="saveProfile">שמור פרופיל</button>
+  </div>
+</div>
+
+<!-- MOVIE DETAILS -->
+<div id="movieModal" class="modal-backdrop hidden">
+  <div class="modal movie-modal">
+    <button id="closeMovie" class="close">✕</button>
+    <div id="movieDetails"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
 </body>
 </html>
