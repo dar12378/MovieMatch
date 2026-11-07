@@ -1,147 +1,123 @@
 
+import difflib
 import json
-import math
 import os
 import re
 import urllib.parse
 import urllib.request
 
+from pathlib import Path
 from http.server import (
     ThreadingHTTPServer,
     SimpleHTTPRequestHandler
 )
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "frontend"
-CATALOG = ROOT / "data" / "catalog.json"
+DATA = ROOT / "data" / "catalog.json"
 
-TMDB_TOKEN = os.getenv("TMDB_BEARER_TOKEN", "").strip()
+TOKEN = os.getenv("TMDB_BEARER_TOKEN", "").strip()
 
-ALLOWED_REGIONS = {"IL", "US", "GB", "ES"}
-ALLOWED_LANGUAGES = {"he-IL", "en-US"}
+LANGUAGES = {"he-IL", "en-US"}
+REGIONS = {"IL", "US", "GB", "ES"}
+
+
+def normalize(text):
+    return re.sub(
+        r"[^\w\u0590-\u05ff]+",
+        "",
+        str(text).lower()
+    )
 
 
 def load_catalog():
-    with open(CATALOG, encoding="utf-8") as file:
+    with DATA.open(encoding="utf-8") as file:
         data = json.load(file)
-    return data["titles"]
+
+    titles = []
+
+    marvel_movies = [
+        row[0]
+        for row in data["titles"]
+        if row[3] == "movie" and row[4] == "marvel"
+    ]
+
+    for number, row in enumerate(data["titles"], 1):
+        title, year, age, kind, group = row[:5]
+        summary = row[5] if len(row) > 5 else ""
+
+        themes = ["action", "teamwork"]
+
+        if kind == "tv":
+            themes.append("fantasy")
+
+        if "Guardians" in title or "Galaxy" in title:
+            themes.append("comedy")
+
+        if "Strange" in title or "Wanda" in title:
+            themes.append("fantasy")
+
+        if "Ant-Man" in title:
+            themes.append("science")
+
+        if "Avatar" in title or "Dragon" in title:
+            themes.extend(["fantasy", "family"])
+
+        aliases = []
+
+        if "Spider-Man" in title:
+            aliases.extend([
+                "Spiderman", "Spider Man",
+                "ספיידרמן", "פיטר פארקר"
+            ])
+
+        if "Iron Man" in title:
+            aliases.extend(["Ironman", "איירון מן", "Tony Stark"])
+
+        if "Thor" in title:
+            aliases.extend(["תור", "Thor Odinson"])
+
+        if "Avengers" in title:
+            aliases.extend(["הנוקמים", "Avenger"])
+
+        if "Captain America" in title:
+            aliases.extend(["קפטן אמריקה", "Steve Rogers"])
+
+        if group == "marvel":
+            aliases.extend(["Marvel", "מארוול", "MCU"])
+
+        item = {
+            "source": "local",
+            "id": number,
+            "title": title,
+            "year": year,
+            "min_age": age,
+            "kind": kind,
+            "group": group,
+            "summary": summary,
+            "aliases": aliases,
+            "tags": aliases,
+            "themes": list(set(themes)),
+            "poster": None,
+            "popularity": 1000 - number,
+            "watch_orders": {}
+        }
+
+        if title in marvel_movies:
+            item["watch_orders"] = {
+                "release": marvel_movies
+            }
+
+        titles.append(item)
+
+    return titles
 
 
-def safe_int(value, default, minimum, maximum):
-    try:
-        number = int(value)
-        return max(minimum, min(number, maximum))
-    except (TypeError, ValueError):
-        return default
+def fetch_tmdb(path, params=None):
+    if not TOKEN:
+        raise ValueError("TMDB is not connected")
 
-
-def words(text):
-    return set(
-        re.findall(r"[^\W_]+", str(text).lower(), flags=re.UNICODE)
-    )
-
-
-def recommend(profile, catalog=None):
-    if catalog is None:
-        catalog = load_catalog()
-
-    age = safe_int(profile.get("age"), 12, 1, 100)
-    kind = profile.get("kind", "both")
-
-    if kind not in {"both", "movie", "tv"}:
-        kind = "both"
-
-    themes = set(profile.get("themes") or [])
-    avoid = set(profile.get("avoid") or [])
-    taste = words(profile.get("taste", ""))
-
-    results = []
-
-    for original in catalog:
-        item = dict(original)
-
-        if kind != "both" and item["kind"] != kind:
-            continue
-
-        # Titles without age guidance are not eligible
-        # for children's recommendations.
-        min_age = item.get("min_age")
-
-        if min_age is None or min_age > age:
-            continue
-
-        # Do not recommend titles with explicitly excluded
-        # content sensitivities.
-        levels = item.get("content_levels", {})
-
-        if any(
-            levels.get(topic, "unknown") not in {"none", "mild"}
-            for topic in avoid
-        ):
-            continue
-
-        # A user asking to avoid a category should not
-        # receive a title strongly associated with it.
-        if any(
-            theme in item.get("themes", [])
-            for theme in avoid
-        ):
-            continue
-
-        text = " ".join([
-            item.get("title", ""),
-            item.get("summary", ""),
-            " ".join(item.get("keywords", [])),
-            " ".join(item.get("themes", []))
-        ])
-
-        tokens = words(text)
-
-        overlap = len(tokens.intersection(taste))
-        theme_matches = len(
-            themes.intersection(set(item.get("themes", [])))
-        )
-
-        score = (
-            item.get("rating", 0) * 3 +
-            theme_matches * 14 +
-            overlap * 12 +
-            math.log1p(item.get("popularity", 0))
-        )
-
-        item["match_score"] = round(score, 2)
-        item["source"] = "demo"
-
-        item["why"] = [
-            theme for theme in item.get("themes", [])
-            if theme in themes
-        ]
-
-        if overlap and not item["why"]:
-            item["why"] = ["Matches your favorite titles"]
-
-        if not item["why"]:
-            item["why"] = ["Popular title from the catalog"]
-
-        results.append(item)
-
-    results.sort(
-        key=lambda item: item["match_score"],
-        reverse=True
-    )
-
-    limit = safe_int(profile.get("limit"), 3, 1, 20)
-    return results[:limit]
-
-
-def tmdb_fetch(path, params=None):
-    if not TMDB_TOKEN:
-        raise ValueError(
-            "TMDB is not connected. Configure TMDB_BEARER_TOKEN."
-        )
-
-    url = "https://api.themoviedb.org/3/" + path.lstrip("/")
+    url = "https://api.themoviedb.org/3/" + path
 
     if params:
         url += "?" + urllib.parse.urlencode(params)
@@ -149,7 +125,7 @@ def tmdb_fetch(path, params=None):
     request = urllib.request.Request(
         url,
         headers={
-            "Authorization": "Bearer " + TMDB_TOKEN,
+            "Authorization": "Bearer " + TOKEN,
             "Accept": "application/json"
         }
     )
@@ -160,78 +136,135 @@ def tmdb_fetch(path, params=None):
         return json.load(response)
 
 
+def convert_tmdb(raw, kind):
+    poster = raw.get("poster_path")
+    date = (
+        raw.get("release_date")
+        or raw.get("first_air_date")
+        or ""
+    )
+
+    return {
+        "source": "tmdb",
+        "id": raw["id"],
+        "title": raw.get("title") or raw.get("name") or "",
+        "year": date[:4],
+        "kind": kind,
+        "group": "external",
+        "summary": raw.get("overview", ""),
+        "min_age": None,
+        "themes": [],
+        "aliases": [],
+        "tags": [],
+        "popularity": raw.get("popularity", 0),
+        "poster": (
+            "https://image.tmdb.org/t/p/w500" + poster
+            if poster else None
+        ),
+        "watch_orders": {}
+    }
+
+
 def search_titles(query, language="en-US"):
-    if language not in ALLOWED_LANGUAGES:
+    normalized = normalize(query)
+    items = load_catalog()
+
+    matches = []
+    correction = None
+
+    for item in items:
+        terms = [
+            item["title"],
+            *item["aliases"]
+        ]
+
+        scores = []
+
+        for term in terms:
+            name = normalize(term)
+
+            if not name:
+                continue
+
+            if normalized in name or name in normalized:
+                scores.append(1.0)
+            else:
+                scores.append(
+                    difflib.SequenceMatcher(
+                        None, normalized, name
+                    ).ratio()
+                )
+
+        best = max(scores, default=0)
+
+        if best >= 0.68:
+            matches.append((best, item))
+
+    matches.sort(key=lambda x: -x[0])
+
+    local_results = [
+        item for _, item in matches[:70]
+    ]
+
+    if matches and matches[0][0] < 1:
+        correction = matches[0][1]["title"]
+
+    if not TOKEN:
+        return {
+            "items": local_results,
+            "corrected": correction
+        }
+
+    if language not in LANGUAGES:
         language = "en-US"
 
-    if not TMDB_TOKEN:
-        catalog = load_catalog()
-        return [
-            {
-                **item,
-                "source": "demo"
-            }
-            for item in catalog
-            if query.lower() in item["title"].lower()
-        ][:20]
+    response = fetch_tmdb(
+        "search/multi",
+        {
+            "query": query,
+            "language": language,
+            "include_adult": "false"
+        }
+    )
 
-    response = tmdb_fetch("search/multi", {
-        "query": query,
-        "language": language,
-        "include_adult": "false"
-    })
+    seen = {
+        (item["kind"], normalize(item["title"]))
+        for item in local_results
+    }
 
-    items = []
-
-    for result in response.get("results", []):
-        kind = result.get("media_type")
+    for raw in response.get("results", []):
+        kind = raw.get("media_type")
 
         if kind not in {"movie", "tv"}:
             continue
 
-        if result.get("adult"):
-            continue
+        item = convert_tmdb(raw, kind)
+        key = (kind, normalize(item["title"]))
 
-        date = (
-            result.get("release_date") or
-            result.get("first_air_date") or ""
-        )
+        if key not in seen:
+            local_results.append(item)
+            seen.add(key)
 
-        poster = result.get("poster_path")
-
-        items.append({
-            "id": result["id"],
-            "kind": kind,
-            "title": result.get("title") or result.get("name"),
-            "year": date[:4],
-            "summary": result.get("overview", ""),
-            "rating": result.get("vote_average", 0),
-            "poster": (
-                "https://image.tmdb.org/t/p/w342" + poster
-                if poster else None
-            ),
-            "min_age": None,
-            "themes": [],
-            "source": "tmdb"
-        })
-
-    return items[:20]
+    return {
+        "items": local_results[:90],
+        "corrected": correction
+    }
 
 
-def movie_details(kind, identifier, region, language):
+def get_details(kind, identifier, region, language):
     if kind not in {"movie", "tv"}:
         raise ValueError("Invalid media type")
 
     if not str(identifier).isdigit():
-        raise ValueError("Invalid title identifier")
+        raise ValueError("Invalid ID")
 
-    if region not in ALLOWED_REGIONS:
+    if region not in REGIONS:
         region = "IL"
 
-    if language not in ALLOWED_LANGUAGES:
+    if language not in LANGUAGES:
         language = "en-US"
 
-    response = tmdb_fetch(
+    response = fetch_tmdb(
         f"{kind}/{identifier}",
         {
             "language": language,
@@ -243,70 +276,34 @@ def movie_details(kind, identifier, region, language):
         "watch/providers", {}
     ).get("results", {}).get(region, {})
 
-    details = {
-        "id": response["id"],
-        "kind": kind,
-        "title": (
-            response.get("title") or
-            response.get("name")
-        ),
-        "summary": response.get("overview", ""),
-        "rating": response.get("vote_average", 0),
-        "min_age": None,
-        "source": "tmdb",
-        "flatrate": [
-            p["provider_name"]
-            for p in providers.get("flatrate", [])
+    result = {
+        "providers": [
+            provider["provider_name"]
+            for provider in providers.get("flatrate", [])
         ],
-        "rent": [
-            p["provider_name"]
-            for p in providers.get("rent", [])
-        ],
-        "buy": [
-            p["provider_name"]
-            for p in providers.get("buy", [])
-        ],
-        "watch_link": providers.get("link"),
-        "collection": [],
-        "seasons": []
+        "link": providers.get("link"),
+        "collection": []
     }
 
-    if kind == "movie":
-        collection = response.get("belongs_to_collection")
+    collection = response.get("belongs_to_collection")
 
-        if collection:
-            info = tmdb_fetch(
-                "collection/" + str(collection["id"]),
-                {"language": language}
-            )
+    if kind == "movie" and collection:
+        data = fetch_tmdb(
+            f"collection/{collection['id']}",
+            {"language": language}
+        )
 
-            movies = sorted(
-                info.get("parts", []),
-                key=lambda x: x.get("release_date", "")
-            )
+        movies = sorted(
+            data.get("parts", []),
+            key=lambda x: x.get("release_date") or "9999"
+        )
 
-            details["collection"] = [
-                {
-                    "title": movie["title"],
-                    "year": (
-                        movie.get("release_date") or ""
-                    )[:4]
-                }
-                for movie in movies
-            ]
-
-    if kind == "tv":
-        details["seasons"] = [
-            {
-                "number": season["season_number"],
-                "name": season["name"],
-                "episodes": season.get("episode_count")
-            }
-            for season in response.get("seasons", [])
-            if season.get("season_number", 0) > 0
+        result["collection"] = [
+            movie["title"]
+            for movie in movies
         ]
 
-    return details
+    return result
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -318,8 +315,8 @@ class Handler(SimpleHTTPRequestHandler):
             **kwargs
         )
 
-    def json_response(self, data, status=200):
-        body = json.dumps(
+    def reply(self, data, status=200):
+        raw = json.dumps(
             data, ensure_ascii=False
         ).encode("utf-8")
 
@@ -328,106 +325,68 @@ class Handler(SimpleHTTPRequestHandler):
             "Content-Type",
             "application/json; charset=utf-8"
         )
+        self.send_header("Content-Length", str(len(raw)))
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(raw)
 
     def do_GET(self):
         parsed = urllib.parse.urlsplit(self.path)
-        query = urllib.parse.parse_qs(parsed.query)
+        params = urllib.parse.parse_qs(parsed.query)
+
+        def param(name, default=""):
+            return params.get(name, [default])[0]
 
         try:
             if parsed.path == "/api/status":
-                return self.json_response({
-                    "ok": True,
-                    "tmdb_enabled": bool(TMDB_TOKEN),
-                    "catalog_count": len(load_catalog()),
-                    "languages": ["en", "he"]
+                return self.reply({
+                    "version": "0.3",
+                    "tmdb_enabled": bool(TOKEN),
+                    "catalog_count": len(load_catalog())
                 })
 
             if parsed.path == "/api/catalog":
-                return self.json_response({
+                return self.reply({
                     "items": load_catalog()
                 })
 
             if parsed.path == "/api/search":
-                term = query.get("q", [""])[0].strip()
+                query = param("q").strip()[:120]
+                language = param("language", "en-US")
 
-                if len(term) < 2:
-                    return self.json_response({"items": []})
+                if not query:
+                    return self.reply({
+                        "items": [],
+                        "corrected": None
+                    })
 
-                if len(term) > 120:
-                    raise ValueError("Search query too long")
-
-                language = query.get(
-                    "language", ["en-US"]
-                )[0]
-
-                return self.json_response({
-                    "items": search_titles(term, language)
-                })
-
-            if parsed.path == "/api/details":
-                kind = query.get("kind", ["movie"])[0]
-                identifier = query.get("id", [""])[0]
-                region = query.get("region", ["IL"])[0]
-                language = query.get(
-                    "language", ["en-US"]
-                )[0]
-
-                return self.json_response(
-                    movie_details(
-                        kind, identifier, region, language
-                    )
+                return self.reply(
+                    search_titles(query, language)
                 )
 
-        except (ValueError, FileNotFoundError) as error:
-            return self.json_response({
+            if parsed.path == "/api/details":
+                return self.reply(get_details(
+                    param("kind", "movie"),
+                    param("id"),
+                    param("region", "IL"),
+                    param("language", "en-US")
+                ))
+
+        except ValueError as error:
+            return self.reply({
                 "error": str(error)
             }, 400)
 
-        except Exception:
-            return self.json_response({
-                "error": "External service or server error"
+        except Exception as error:
+            print("API ERROR:", error)
+            return self.reply({
+                "error": "Movie data service unavailable"
             }, 502)
 
         return super().do_GET()
 
-    def do_POST(self):
-        try:
-            if self.path != "/api/recommend":
-                return self.json_response({
-                    "error": "Not found"
-                }, 404)
 
-            length = int(
-                self.headers.get("Content-Length", "0")
-            )
-
-            if length < 0 or length > 65536:
-                raise ValueError("Invalid request size")
-
-            data = json.loads(
-                self.rfile.read(length).decode("utf-8")
-            )
-
-            if not isinstance(data, dict):
-                raise ValueError("Expected an object")
-
-            return self.json_response({
-                "items": recommend(data),
-                "source": "demo_catalog",
-                "availability_verified": False
-            })
-
-        except (ValueError, json.JSONDecodeError) as error:
-            return self.json_response({
-                "error": str(error)
-            }, 400)
-
-
-def start():
+def main():
     port = int(os.getenv("PORT", "8000"))
 
     server = ThreadingHTTPServer(
@@ -435,9 +394,13 @@ def start():
         Handler
     )
 
-    print(f"MovieMatch is running at http://localhost:{port}")
+    print(
+        f"MovieMatch v0.3 running at http://localhost:{port}",
+        flush=True
+    )
+
     server.serve_forever()
 
 
 if __name__ == "__main__":
-    start()
+    main()
