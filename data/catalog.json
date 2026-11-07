@@ -1,308 +1,76 @@
 
 {
-  "version": "0.2",
-  "notice": "Demo data. Age guidance is illustrative, not official.",
+  "version": "0.3",
+  "notice": "Demo age guidance only. Streaming availability is not verified.",
   "titles": [
-    {
-      "id": 1,
-      "kind": "movie",
-      "title": "Iron Man",
-      "year": 2008,
-      "rating": 7.9,
-      "popularity": 900,
-      "min_age": 13,
-      "themes": ["action", "science", "teamwork"],
-      "keywords": ["Marvel", "MCU", "Tony Stark", "superhero"],
-      "summary": "Tony Stark builds an advanced armored suit and becomes Iron Man.",
-      "poster": null,
-      "content_levels": {
-        "violence": "moderate",
-        "horror": "none",
-        "romance": "mild"
-      },
-      "watch_orders": {
-        "release": [
-          "Iron Man",
-          "Thor",
-          "Captain America: The First Avenger",
-          "The Avengers"
-        ],
-        "story": [
-          "Captain America: The First Avenger",
-          "Iron Man",
-          "Thor",
-          "The Avengers"
-        ]
-      }
-    },
-    {
-      "id": 2,
-      "kind": "movie",
-      "title": "Thor",
-      "year": 2011,
-      "rating": 7.0,
-      "popularity": 800,
-      "min_age": 13,
-      "themes": ["action", "fantasy", "family"],
-      "keywords": ["Marvel", "MCU", "Thor", "Asgard", "superhero"],
-      "summary": "The powerful Thor is sent to Earth and learns responsibility.",
-      "poster": null,
-      "content_levels": {
-        "violence": "moderate",
-        "horror": "none",
-        "romance": "mild"
-      },
-      "watch_orders": {
-        "release": [
-          "Iron Man",
-          "Thor",
-          "Captain America: The First Avenger",
-          "The Avengers"
-        ],
-        "story": [
-          "Captain America: The First Avenger",
-          "Iron Man",
-          "Thor",
-          "The Avengers"
-        ]
-      }
-    },
-    {
-      "id": 3,
-      "kind": "movie",
-      "title": "Captain America: The First Avenger",
-      "year": 2011,
-      "rating": 6.9,
-      "popularity": 850,
-      "min_age": 13,
-      "themes": ["action", "teamwork", "friendship"],
-      "keywords": ["Marvel", "MCU", "Steve Rogers", "superhero"],
-      "summary": "Steve Rogers becomes Captain America during World War II.",
-      "poster": null,
-      "content_levels": {
-        "violence": "moderate",
-        "horror": "none",
-        "romance": "mild"
-      },
-      "watch_orders": {
-        "release": [
-          "Iron Man",
-          "Thor",
-          "Captain America: The First Avenger",
-          "The Avengers"
-        ],
-        "story": [
-          "Captain America: The First Avenger",
-          "Iron Man",
-          "Thor",
-          "The Avengers"
-        ]
-      }
-    },
-    {
-      "id": 4,
-      "kind": "movie",
-      "title": "The Avengers",
-      "year": 2012,
-      "rating": 8.0,
-      "popularity": 1000,
-      "min_age": 13,
-      "themes": ["action", "teamwork", "friendship"],
-      "keywords": ["Marvel", "MCU", "Iron Man", "Thor", "Hulk", "superhero"],
-      "summary": "Earth's greatest superheroes unite against a powerful threat.",
-      "poster": null,
-      "content_levels": {
-        "violence": "moderate",
-        "horror": "mild",
-        "romance": "none"
-      },
-      "watch_orders": {
-        "release": [
-          "Iron Man",
-          "Thor",
-          "Captain America: The First Avenger",
-          "The Avengers"
-        ],
-        "story": [
-          "Captain America: The First Avenger",
-          "Iron Man",
-          "Thor",
-          "The Avengers"
-        ]
-      }
-    },
-    {
-      "id": 5,
-      "kind": "movie",
-      "title": "Spider-Man: Into the Spider-Verse",
-      "year": 2018,
-      "rating": 8.4,
-      "popularity": 950,
-      "min_age": 10,
-      "themes": ["action", "teamwork", "friendship"],
-      "keywords": ["Spider-Man", "Miles Morales", "Marvel", "multiverse"],
-      "summary": "Miles Morales discovers his powers and meets other Spider-People.",
-      "poster": null,
-      "content_levels": {
-        "violence": "mild",
-        "horror": "mild",
-        "romance": "none"
-      },
-      "watch_orders": {
-        "release": [
-          "Spider-Man: Into the Spider-Verse",
-          "Spider-Man: Across the Spider-Verse"
-        ]
-      }
-    },
-    {
-      "id": 6,
-      "kind": "movie",
-      "title": "Spider-Man: Across the Spider-Verse",
-      "year": 2023,
-      "rating": 8.3,
-      "popularity": 950,
-      "min_age": 10,
-      "themes": ["action", "friendship", "family"],
-      "keywords": ["Spider-Man", "Miles Morales", "Marvel", "multiverse"],
-      "summary": "Miles travels through the multiverse and faces difficult choices.",
-      "poster": null,
-      "content_levels": {
-        "violence": "moderate",
-        "horror": "mild",
-        "romance": "none"
-      },
-      "watch_orders": {
-        "release": [
-          "Spider-Man: Into the Spider-Verse",
-          "Spider-Man: Across the Spider-Verse"
-        ]
-      }
-    },
-    {
-      "id": 7,
-      "kind": "movie",
-      "title": "How to Train Your Dragon",
-      "year": 2010,
-      "rating": 8.1,
-      "popularity": 900,
-      "min_age": 8,
-      "themes": ["fantasy", "friendship", "family", "teamwork"],
-      "keywords": ["dragons", "Hiccup", "Toothless", "adventure"],
-      "summary": "A young Viking befriends a dragon and changes his village.",
-      "poster": null,
-      "content_levels": {
-        "violence": "mild",
-        "horror": "mild",
-        "romance": "none"
-      },
-      "watch_orders": {
-        "release": [
-          "How to Train Your Dragon",
-          "How to Train Your Dragon 2",
-          "How to Train Your Dragon: The Hidden World"
-        ]
-      }
-    },
-    {
-      "id": 8,
-      "kind": "movie",
-      "title": "The Incredibles",
-      "year": 2004,
-      "rating": 8.0,
-      "popularity": 900,
-      "min_age": 8,
-      "themes": ["action", "teamwork", "family"],
-      "keywords": ["Pixar", "superhero", "family", "powers"],
-      "summary": "A family of superheroes joins forces to save the day.",
-      "poster": null,
-      "content_levels": {
-        "violence": "mild",
-        "horror": "mild",
-        "romance": "none"
-      },
-      "watch_orders": {
-        "release": [
-          "The Incredibles",
-          "Incredibles 2"
-        ]
-      }
-    },
-    {
-      "id": 9,
-      "kind": "movie",
-      "title": "The Martian",
-      "year": 2015,
-      "rating": 8.0,
-      "popularity": 850,
-      "min_age": 13,
-      "themes": ["science", "teamwork", "action"],
-      "keywords": ["Mars", "space", "NASA", "survival"],
-      "summary": "An astronaut stranded on Mars uses science to survive.",
-      "poster": null,
-      "content_levels": {
-        "violence": "mild",
-        "horror": "none",
-        "romance": "none"
-      },
-      "watch_orders": {}
-    },
-    {
-      "id": 10,
-      "kind": "movie",
-      "title": "Pride & Prejudice",
-      "year": 2005,
-      "rating": 7.8,
-      "popularity": 700,
-      "min_age": 12,
-      "themes": ["romance", "family", "friendship"],
-      "keywords": ["Jane Austen", "Elizabeth Bennet", "romantic"],
-      "summary": "Elizabeth Bennet navigates love, family and social expectations.",
-      "poster": null,
-      "content_levels": {
-        "violence": "none",
-        "horror": "none",
-        "romance": "moderate"
-      },
-      "watch_orders": {}
-    },
-    {
-      "id": 11,
-      "kind": "tv",
-      "title": "Avatar: The Last Airbender",
-      "year": 2005,
-      "rating": 9.0,
-      "popularity": 1000,
-      "min_age": 9,
-      "themes": ["fantasy", "teamwork", "friendship"],
-      "keywords": ["Aang", "bending", "elements", "adventure"],
-      "summary": "A young Avatar and his friends try to restore balance to the world.",
-      "poster": null,
-      "content_levels": {
-        "violence": "mild",
-        "horror": "mild",
-        "romance": "mild"
-      },
-      "watch_orders": {}
-    },
-    {
-      "id": 12,
-      "kind": "tv",
-      "title": "Stranger Things",
-      "year": 2016,
-      "rating": 8.6,
-      "popularity": 1000,
-      "min_age": 16,
-      "themes": ["friendship", "horror", "fantasy"],
-      "keywords": ["Netflix", "mystery", "supernatural"],
-      "summary": "A group of friends encounters mysterious and dangerous events.",
-      "poster": null,
-      "content_levels": {
-        "violence": "high",
-        "horror": "high",
-        "romance": "mild"
-      },
-      "watch_orders": {}
-    }
+    ["Iron Man", 2008, 13, "movie", "marvel", "Tony Stark creates an advanced armored suit and becomes Iron Man."],
+    ["The Incredible Hulk", 2008, 13, "movie", "marvel", "Bruce Banner struggles to control his powerful transformation."],
+    ["Iron Man 2", 2010, 13, "movie", "marvel", "Tony Stark faces new enemies and challenges."],
+    ["Thor", 2011, 13, "movie", "marvel", "Thor is banished to Earth and learns what it means to be a hero."],
+    ["Captain America: The First Avenger", 2011, 13, "movie", "marvel", "Steve Rogers becomes Captain America during World War II."],
+    ["The Avengers", 2012, 13, "movie", "marvel", "Earth's superheroes unite to stop a major threat."],
+    ["Iron Man 3", 2013, 13, "movie", "marvel"],
+    ["Thor: The Dark World", 2013, 13, "movie", "marvel"],
+    ["Captain America: The Winter Soldier", 2014, 13, "movie", "marvel"],
+    ["Guardians of the Galaxy", 2014, 13, "movie", "marvel", "A team of unlikely heroes comes together in space."],
+    ["Avengers: Age of Ultron", 2015, 13, "movie", "marvel"],
+    ["Ant-Man", 2015, 13, "movie", "marvel"],
+    ["Captain America: Civil War", 2016, 13, "movie", "marvel", "A conflict divides the Avengers into opposing teams."],
+    ["Doctor Strange", 2016, 13, "movie", "marvel", "A former surgeon discovers the world of magic."],
+    ["Guardians of the Galaxy Vol. 2", 2017, 13, "movie", "marvel"],
+    ["Spider-Man: Homecoming", 2017, 13, "movie", "marvel", "Peter Parker balances school life with being Spider-Man."],
+    ["Thor: Ragnarok", 2017, 13, "movie", "marvel"],
+    ["Black Panther", 2018, 13, "movie", "marvel"],
+    ["Avengers: Infinity War", 2018, 13, "movie", "marvel", "The Avengers face Thanos and his dangerous plan."],
+    ["Ant-Man and the Wasp", 2018, 13, "movie", "marvel"],
+    ["Captain Marvel", 2019, 13, "movie", "marvel"],
+    ["Avengers: Endgame", 2019, 13, "movie", "marvel", "The surviving Avengers attempt to reverse Thanos' actions."],
+    ["Spider-Man: Far From Home", 2019, 13, "movie", "marvel"],
+    ["Black Widow", 2021, 13, "movie", "marvel"],
+    ["Shang-Chi and the Legend of the Ten Rings", 2021, 13, "movie", "marvel"],
+    ["Eternals", 2021, 13, "movie", "marvel"],
+    ["Spider-Man: No Way Home", 2021, 13, "movie", "marvel", "Peter Parker confronts the consequences of his exposed identity."],
+    ["Doctor Strange in the Multiverse of Madness", 2022, 16, "movie", "marvel"],
+    ["Thor: Love and Thunder", 2022, 13, "movie", "marvel"],
+    ["Black Panther: Wakanda Forever", 2022, 13, "movie", "marvel"],
+    ["Ant-Man and the Wasp: Quantumania", 2023, 13, "movie", "marvel"],
+    ["Guardians of the Galaxy Vol. 3", 2023, 13, "movie", "marvel"],
+    ["The Marvels", 2023, 13, "movie", "marvel"],
+    ["Deadpool & Wolverine", 2024, 18, "movie", "marvel"],
+    ["Captain America: Brave New World", 2025, 13, "movie", "marvel"],
+    ["Thunderbolts*", 2025, 13, "movie", "marvel"],
+    ["The Fantastic Four: First Steps", 2025, 13, "movie", "marvel"],
+
+    ["WandaVision", 2021, 13, "tv", "marvel", "Wanda and Vision appear to live in a mysterious suburban world."],
+    ["The Falcon and the Winter Soldier", 2021, 13, "tv", "marvel"],
+    ["Loki", 2021, 13, "tv", "marvel", "Loki explores alternate timelines and the multiverse."],
+    ["What If...?", 2021, 13, "tv", "marvel"],
+    ["Hawkeye", 2021, 13, "tv", "marvel"],
+    ["Moon Knight", 2022, 16, "tv", "marvel"],
+    ["Ms. Marvel", 2022, 13, "tv", "marvel"],
+    ["She-Hulk: Attorney at Law", 2022, 13, "tv", "marvel"],
+    ["Secret Invasion", 2023, 16, "tv", "marvel"],
+    ["Echo", 2024, 18, "tv", "marvel"],
+    ["Agatha All Along", 2024, 13, "tv", "marvel"],
+    ["Daredevil: Born Again", 2025, 18, "tv", "marvel"],
+    ["Ironheart", 2025, 13, "tv", "marvel"],
+    ["Your Friendly Neighborhood Spider-Man", 2025, 13, "tv", "marvel"],
+    ["Eyes of Wakanda", 2025, 13, "tv", "marvel"],
+    ["Marvel Zombies", 2025, 18, "tv", "marvel"],
+    ["Wonder Man", 2026, 13, "tv", "marvel"],
+    ["X-Men: The Animated Series", 1992, 10, "tv", "marvel"],
+    ["X-Men '97", 2024, 13, "tv", "marvel"],
+    ["The Incredible Hulk", 1996, 10, "tv", "marvel"],
+    ["Spider-Man: The Animated Series", 1994, 9, "tv", "marvel"],
+
+    ["Spider-Man: Into the Spider-Verse", 2018, 10, "movie", "marvel", "Miles Morales discovers his spider powers and meets other Spider-People."],
+    ["Spider-Man: Across the Spider-Verse", 2023, 10, "movie", "marvel"],
+    ["Big Hero 6", 2014, 8, "movie", "marvel"],
+
+    ["Avatar: The Last Airbender", 2005, 9, "tv", "other", "Aang and his friends set out to restore balance to the world."],
+    ["How to Train Your Dragon", 2010, 8, "movie", "other", "Hiccup develops an extraordinary friendship with a dragon."],
+    ["The Incredibles", 2004, 8, "movie", "other", "A superhero family works together to save the world."],
+    ["The Martian", 2015, 13, "movie", "other", "A stranded astronaut uses science to survive on Mars."],
+    ["Stranger Things", 2016, 16, "tv", "other", "A group of friends investigates supernatural events in their town."]
   ]
 }
